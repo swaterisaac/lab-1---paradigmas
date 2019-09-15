@@ -72,7 +72,7 @@
 ;rec: booleano
 (define (player? P)
   (if (list? P)
-      (if (and (= (car P) "P")
+      (if (and (equal? (car P) "P")
                (intPositive? (car (cdr P)))
                (intPositive? (car (cdr (cdr P))))
                (intPositive? (car (cdr (cdr (cdr P)))))
@@ -91,7 +91,37 @@
 ;desc: Función selectora de player que saca la coordenada Y.
 ;dom: player
 ;rec: coordenada Y de player número entero positivo incluyendo 0)
-                
+
+;Enemy
+
+;createEnemy: parámetros (X Y angle)
+;desc: Función constructora de un enemy.
+;dom: entero X entero X num
+;X: coordenada en X (suelo)
+;Y: coordenada base en Y (altura)
+;angle: ángulo con el que mira el Enemy.
+;rec: Enemy
+(define (createEnemy X Y angle)
+  (if (not (null? (createPlayer X Y angle)))
+      (cons "E" (cdr (createPlayer X Y angle))) 
+      null)
+  )
+
+;enemy?: parámetros (algo)
+;desc: Función de pertenencia de enemy.
+;dom: algo
+;rec: bool
+(define (enemy? E)
+  (if (and
+       (list? E)
+       (equal? (car E) "E")
+       (player? (cons "P" (cdr E)))
+       )
+       #t
+       #f
+      )
+  )
+  
 ;createScene:
 ;Dom: cuatro números enteros positivos y un número entero.
 ;N y M indican el tamaño del escenario.
