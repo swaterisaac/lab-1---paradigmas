@@ -1,4 +1,6 @@
 #lang racket
+;funciones generales
+
 ;intPositive?: Parámetros (algo)
 ;desc: Comprueba si un número es entero positivo (aunque incluye el 0)
 ;dom: Cualquier tipo de dato
@@ -9,6 +11,21 @@
           #t
           #f)
       #f)
+  )
+;get: Parámetros (lista num)
+;desc: Nos da el elemento <num> de la <lista>
+;dom: lista X entero
+;rec: algo (el elemento que saquemos de la lista)
+(define (get lista num)
+  (if (list? lista)
+      (if (null? lista)
+          lista
+          (if (= num 0)
+              (car lista)
+              (get (cdr lista) (- num 1))
+              )
+          )
+      null)
   )
 
 ;Suelo: El suelo de la escena, en donde se paran los jugadores y enemigos.}
