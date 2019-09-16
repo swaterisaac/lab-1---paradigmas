@@ -107,7 +107,7 @@
 ;getPlayerY: parámetros (player)
 ;desc: Función selectora de player que saca la coordenada Y.
 ;dom: player
-;rec: coordenada Y de player número entero positivo incluyendo 0)
+;rec: coordenada Y de player (número entero positivo incluyendo 0)
 
 ;Enemy
 
@@ -138,7 +138,56 @@
        #f
       )
   )
-  
+
+;getEnemyX: parámetros (enemy)
+;desc: Función que nos da la coordenada X de un enemigo
+;dom: Enemy
+;rec: La coordenada X (suelo) donde se ubica ese enemy.
+
+;getEnemyY: parámetros (enemy)
+;desc: Función que nos da la coordenada Y de un enemigo
+;dom: Enemy
+;rec: La coordenada Y (altura) donde se ubica ese enemy.
+
+;Bullet
+
+;createBullet: parámetros (X Y angle)
+;desc: Función constructora de bullet (representación de proyectil)
+;dom: entero X entero X número
+;rec: Bullet.
+
+(define (createBullet X Y angle)
+  (if (and
+         (intPositive? X)
+         (intPositive? Y)
+         (number? angle)
+      )
+      (list "B" X Y angle)
+      null
+      )
+  )
+;bullet?: parámetros (algo)
+;desc: Función de pertenencia de bullet.
+;dom: algo
+;rec: booleano
+(define (bullet? B)
+  (if (list? B)
+      (if (and
+           (equal? "B" (car B))
+           (intPositive? (get B 1))
+           (intPositive? (get B 2))
+           (number? (get B 3))
+          )
+          #t
+          #f
+          )
+      #f
+      )
+  )
+
+
+
+
 ;createScene:
 ;Dom: cuatro números enteros positivos y un número entero.
 ;N y M indican el tamaño del escenario.
