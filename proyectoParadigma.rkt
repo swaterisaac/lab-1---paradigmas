@@ -50,22 +50,12 @@
   (if (list? F)
       (if (and
                (equal? (car F) "F")
-               (intPositive? (car (cdr F)))
-               (intPositive? (car (cdr (cdr F))))
+               (intPositive? (get F 1))
+               (intPositive? (get F 2))
                )
           #t
           #f)
       #f))
-;getX: parámetros (floor)
-;desc: Recibe un floor y entrega la coordenada X.
-;dom: floor
-;rec: Coordenada X del floor.
-
-;getY: parámetros (floor)
-;desc: Recibe un floor y entrega la coordenada Y.
-;dom: floor
-;rec: Coordenada Y del floor.
-
 
 ;Player
 
@@ -80,7 +70,7 @@
   (if (and (intPositive? X)
            (intPositive? Y)
            (number? angle))
-      (list "P" X Y (+ Y 1) (modulo angle 360))
+      (list "P" X Y (modulo angle 360))
       null)
   )
 ;player?: parámetros (player)
@@ -90,24 +80,16 @@
 (define (player? P)
   (if (list? P)
       (if (and (equal? (car P) "P")
-               (intPositive? (car (cdr P)))
-               (intPositive? (car (cdr (cdr P))))
-               (intPositive? (car (cdr (cdr (cdr P)))))
-               (intPositive? (car (cdr (cdr (cdr (cdr P))))))
+               (intPositive? (get P 1))
+               (intPositive? (get P 2))
+               (number? (get P 3))
                )
           #t
           #f)
       #f)
   )
 ;getPlayerX: parámetros (player)
-;desc: Función selectora de player que saca la coordenada X.
-;dom: player
-;rec: coordenada X de player (numero entero positivo incluyendo 0)
 
-;getPlayerY: parámetros (player)
-;desc: Función selectora de player que saca la coordenada Y.
-;dom: player
-;rec: coordenada Y de player (número entero positivo incluyendo 0)
 
 ;Enemy
 
@@ -139,15 +121,6 @@
       )
   )
 
-;getEnemyX: parámetros (enemy)
-;desc: Función que nos da la coordenada X de un enemigo
-;dom: Enemy
-;rec: La coordenada X (suelo) donde se ubica ese enemy.
-
-;getEnemyY: parámetros (enemy)
-;desc: Función que nos da la coordenada Y de un enemigo
-;dom: Enemy
-;rec: La coordenada Y (altura) donde se ubica ese enemy.
 
 ;Bullet
 
@@ -184,10 +157,64 @@
       #f
       )
   )
+;isScene?: parámetros (algo)
+;desc: Función de pertenencia de elementos de la escena, tales como:
+;floor,player,enemy, bullet y scene.
+;dom: algo
+;rec: booleano
+;;;;EN EL CASO DE AGREGAR UN NUEVO ELEMENTO A ESCENA, SE AGREGA A ESTA FUNCIÓN TAMBIÉN.;;;;
 
+(define (isScene? X)
+  (if (or
+       (floor? X)
+       (player? X)
+       (enemy? X)
+       (bullet? X)
+       )
+      #t
+      #f
+      )
+  )
 
+;Conseguir coordenadas
 
+;getX: parámetros (elemento), donde elemento es un dato relacionado con la escena
+;(floor, player, enemy, bullet)
+;dom: elemento de la escena
+;rec: La coordenada en X donde se ubica (suelo)
+(define (getX X)
+  (if (isScene? X)
+      (get X 1)
+      null
+      )
+  )
 
+;getY: parámetros (elemento), donde elemento es un dato relacionado con la escena
+;(floor, player, enemy, bullet)
+;dom: elemento de la escena
+;rec: La coordenada en Y donde se ubica (altura)
+(define (getY X)
+  (if (isScene? X)
+      (get X 2)
+      null
+      )
+  )
+
+;getAngle: parámetros (elemento), donde elemento es un dato relacionado con la escena
+;(player,enemy o bullet) (se descarta floor)
+;desc: Función que nos da el angle de cualquier cosa parte de la escena menos floor.
+;dom: elemento de la escena (menos floor)
+;rec: El ángulo del elemento en cuestión.
+(define (getAngle X)
+  (if (and
+       (isScene? X)
+       (not (floor? X))
+       )
+      (get X 3)
+      null
+      )
+  )
+      
 ;createScene:
 ;Dom: cuatro números enteros positivos y un número entero.
 ;N y M indican el tamaño del escenario.
