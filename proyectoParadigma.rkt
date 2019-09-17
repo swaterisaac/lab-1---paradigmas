@@ -27,6 +27,16 @@
           )
       null)
   )
+;myAppend: parámetros (lista algo)
+;desc: Agrega algo al final de la lista.
+;dom: lista X algo
+;rec: lista
+(define (myAppend lista algo)
+  (if (null? lista)
+      (cons algo null)
+      (cons (car lista) (myAppend (cdr lista) algo))
+      )
+  )
 
 ;Suelo: El suelo de la escena, en donde se paran los jugadores y enemigos.}
 
@@ -135,7 +145,7 @@
          (intPositive? Y)
          (number? angle)
       )
-      (list "B" X Y angle)
+      (list "B" X Y (modulo angle 360))
       null
       )
   )
@@ -216,8 +226,34 @@
   )
       
 ;createScene:
-;Dom: cuatro números enteros positivos y un número entero.
+;Dom: entero X entero X entero X entero X num
 ;N y M indican el tamaño del escenario.
 ;E la cantidad de enemigos.
 ;D indica la la dificultad.
 ;seed indica la semilla de la escena.
+;Rec: scene.
+;tipo de recursión: Natural.
+(define (createScene N M E D seed)
+  (define (createSceneX N M E D seed scene stop)
+    (if (and
+         (intPositive? N)
+         (intPositive? M)
+         (intPositive? E)
+         (and (intPositive? D) (< D 4))
+         (number? seed)
+         )
+        (if (= M 0)
+            scene
+            (if (= stop 0)
+                (if (= (modulo seed 3) 0)
+                     (createSceneX N (- M 1) E D seed scene 0)
+                     (createSceneX N (- M 1) E D seed (myAppend scene (createFloor M 1)) 1)
+                 )
+                    (createSceneX N (- M 1) E D seed (myAppend scene (createFloor M 1)) 1)
+                )
+            )
+        null
+    )
+    )
+    (createSceneX N M E D seed (list N M E D) 0)
+  )
