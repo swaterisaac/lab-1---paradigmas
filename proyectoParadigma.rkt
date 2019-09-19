@@ -265,7 +265,7 @@
 ;life: vidas del enemigo.
 ;rec: Enemy
 (define (createEnemy X Y angle life)
-  (if (not (null? (createPlayer X Y angle)))
+  (if (not (null? (createPlayer X Y angle life)))
       (cons "E" (cdr (createPlayer X Y angle life))) 
       null)
   )
@@ -340,6 +340,45 @@
       (createEnemy 0 0 0 0)
       )
   )
+;setEnemyY: parámetros (enemy Y)
+;desc: Función modificadora de enemy. Modifica su coordenada en Y.
+;dom: enemy X entero
+;rec: Enemy
+(define (setEnemyY enemy Y)
+  (if (and
+       (enemy? enemy)
+       (intPositive? Y)
+       )
+      (createEnemy (getEnemyX enemy) Y (getEnemyAngle enemy) (getEnemyLife enemy))
+      (createEnemy 0 0 0 0)
+      )
+  )
+;setEnemyAngle: parámetros (enemy angle)
+;desc: Función modificadora de enemy. Modifica su angle.
+;dom: enemy X numero
+;rec: Enemy
+(define (setEnemyAngle enemy angle)
+  (if (and
+       (enemy? enemy)
+       (number? angle)
+       )
+      (createEnemy (getEnemyX enemy) (getEnemyY enemy) angle (getEnemyLife enemy))
+      (createEnemy 0 0 0 0)
+      )
+  )
+;setEnemyLife: parámetros (enemy life)
+;desc: Función modificadora de enemy. Modifica su vida.
+;dom: enemy X life
+;rec: Enemy
+(define (setEnemyLife enemy life)
+  (if (and
+       (enemy? enemy)
+       (intPositive? life)
+       )
+      (createEnemy (getEnemyX enemy) (getEnemyY enemy) (getEnemyAngle enemy) life)
+      (createEnemy 0 0 0 0)
+      )
+  )
       
 ;Bullet
 
@@ -400,7 +439,7 @@
       )
   )
 
-;getAngle: parámetros (bullet)
+;getBulletAngle: parámetros (bullet)
 ;desc: Función selectora de bullet. Nos da su angle.
 ;dom: bullet
 ;rec: numero, representando el angle que posee.
@@ -408,6 +447,47 @@
   (if (bullet? bullet)
       (get bullet 3)
       -1
+      )
+  )
+
+;Modificadoras de bullet
+;setBulletX: parámetros (bullet X)
+;desc: Función modificadora de bullet. Modifica su coordenada en X
+;dom: bullet X entero
+;rec: bullet
+(define (setBulletX bullet X)
+  (if (and
+       (bullet? bullet)
+       (intPositive? X)
+       )
+      (createBullet X (getBulletY bullet) (getBulletAngle bullet))
+      (createBullet 0 0 0)
+      )
+  )
+;setBulletY: parámetros (bullet Y)
+;desc: Función modificadora de bullet. Modifica su coordenada en Y.
+;dom: bullet X entero
+;rec: bullet
+(define (setBulletY bullet Y)
+  (if (and
+       (bullet? bullet)
+       (intPositive? Y)
+       )
+      (createBullet (getBulletX bullet) Y (getBulletAngle bullet))
+      (createBullet 0 0 0)
+      )
+  )
+;setBulletAngle: parámetros (bullet angle)
+;desc: Función modificadora de bullet. Modifica su angle.
+;dom: bullet x num
+;rec: bullet
+(define (setBulletAngle bullet angle)
+  (if (and
+       (bullet? bullet)
+       (number? angle)
+       )
+      (createBullet (getBulletX bullet) (getBulletY bullet) angle)
+      (createBullet 0 0 0)
       )
   )
       
