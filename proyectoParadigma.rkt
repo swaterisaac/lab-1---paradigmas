@@ -51,7 +51,7 @@
     (xn)
     (remainder (+ (* a xn) c) m)
   )
-)
+  )
 
 ;Suelo: El suelo de la escena, en donde se paran los jugadores y enemigos.}
 
@@ -81,42 +81,12 @@
           #f)
       #f))
 
-;createEarth (conjunto de floor)
-;parámetros: (M seed)
-;desc: Función de construcción de un conjunto de floor.
-;dom: entero X entero (positivos)
-;M: Cantidad de floor
-;seed: semilla
-;rec: conjunto de floor ("F" M (X1 Y1) (X2 Y2) ...)
-;Encapsulación: 
-;land: Si genera una isla flotante o no. 0 para no, 1 para si.
-(define (createEarth M N seed)
-  (define (createEarthX M N seed land)
-    (if (= M 0)
-        null
-        (if (= land 0)
-            (if (= (modulo seed 8) 0)
-                (cons (createFloor M 1) (createEarthX (- M 1) N (modulo seed 5) 1))
-                (cons (createFloor M 1) (createEarthX (- M 1) N (myRandom seed) 0))
-            )
-            ;Si land = 1
-            (if (= seed 0)
-                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (myRandom seed) 0)))
-                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (- seed 1) 1)))
-                )
-            )
-        )
-    )
-  (reverse (createEarthX M N seed 0))
-  )
+
 ;earth?: parámetros(algo)
 ;desc: función de pertenencia del conjunto de floor.
 ;dom: algo
 ;rec: booleano
 
-        
-
-  
 
 ;Player
 
@@ -490,7 +460,111 @@
       (createBullet 0 0 0)
       )
   )
-      
+
+;createEarth: (conjunto de floor)
+;parámetros: (M seed)
+;desc: Función de construcción de un conjunto de floor.
+;dom: entero X entero (positivos)
+;M: Cantidad de floor
+;seed: semilla
+;rec: conjunto de floor ("F" M (X1 Y1) (X2 Y2) ...)
+;Encapsulación: 
+;land: Si genera una isla flotante o no. 0 para no, 1 para si.
+(define (createEarth M N seed)
+  (define (createEarthX M N seed land)
+    (if (= M 0)
+        null
+        (if (= land 0)
+            (if (= (modulo seed 8) 0)
+                (cons (createFloor M 1) (createEarthX (- M 1) N (modulo seed 5) 1))
+                (cons (createFloor M 1) (createEarthX (- M 1) N (myRandom seed) 0))
+            )
+            ;Si land = 1
+            (if (= seed 0)
+                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (myRandom seed) 0)))
+                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (- seed 1) 1)))
+                )
+            )
+        )
+    )
+  (reverse (createEarthX M N seed 0))
+  )
+
+;getEarthX: parámetros (earth Nfloor)
+;desc: Función selectora de earth. Nos entrega la coordenada X del floor número algo.
+;dom: earth X entero
+;earth: conjunto de floor
+;Nfloor: Número de floor dentro de earth en donde queremos sacar su coordenada en X.
+;rec: entero, que representa la coordenada en X
+(define (getEarthX earth Nfloor)
+  (if (and
+       (intPositive? Nfloor)
+       (<= Nfloor (length earth))
+       )
+      (get (get earth Nfloor) 0)
+      -1)
+  )
+
+;getEarthY: parámetros (earth Nfloor)
+;desc: Función selectora de earth. Nos entrega la coordenada X del floor número algo.
+;dom: earth X entero
+;earth: conjunto de floor
+;Nfloor: Número de floor dentro de earth en donde queremos sacar su coordenada en Y.
+;rec: entero, que representa la coordenada en Y.
+(define (getEarthY earth Nfloor)
+  (if (and
+       (intPositive? Nfloor)
+       (<= Nfloor (length earth))
+       )
+      (get (get earth Nfloor) 1)
+      -1
+      )
+  )
+
+;generateEnemy: parámetros (earth E seed)
+;desc: Crea un conjunto de enemigos inicial.
+;dom: earth X entero
+;earth: Conjunto de floor
+;E: Cantidad inicial de enemigos
+;seed: semilla
+;rec: lista de enemigos (E (enemy1) (enemy2) ... )
+(define (generateEnemy earth E seed)
+  (if (and
+       (list? earth)
+       (intPositive? E)
+       (intPositive? seed)
+       )
+      (if (= E 0)
+          null
+          (cons (createEnemy
+            (getEarthX earth (modulo seed (length earth)))
+            (+ (getEarthY earth (modulo seed (length earth))) 1)
+            0
+            1
+            )
+            (generateEnemy earth (- E 1) (myRandom seed)))
+          )
+      null
+      )
+  )
+
+;generatePlayer: parámetros (life)
+;desc: Función que genera un conjunto de player.
+;dom: entero
+;life: La cantidad de vida que tiene cada uno de los player
+;rec: Conjunto de player.
+;nota: Siempre serán 3, parten en las primeras 3 coordenadas.
+(define (generatePlayer life)
+  (if (intPositive? life)
+      (list (createPlayer 1 2 -90 life)
+            (createPlayer 2 2 -90 life)
+            (createPlayer 3 2 -90 life)
+            )
+      null
+      )
+  )
+  
+
 ;createScene:
 ;Dom: entero X entero X entero X entero X num
 ;N y M indican el tamaño del escenario.
@@ -499,27 +573,25 @@
 ;seed indica la semilla de la escena.
 ;Rec: scene.
 ;tipo de recursión: Natural.
-(define (createScene N M E D seed)
-  (define (createSceneX N M E D seed scene stop)
+(define (createScene M N E D seed)
     (if (and
-         (intPositive? N)
          (intPositive? M)
+         (intPositive? N)
          (intPositive? E)
-         (and (intPositive? D) (< D 4))
-         (number? seed)
+         (and (intPositive? D) (< D 3) (> D 0))
+         (intPositive? seed)
          )
-        (if (= M 0)
-            scene
-            (if (= stop 0)
-                (if (= (modulo seed 3) 0)
-                     (createSceneX N (- M 1) E D seed scene 0)
-                     (createSceneX N (- M 1) E D seed (myAppend scene (createFloor M 1)) 1)
-                 )
-                    (createSceneX N (- M 1) E D seed (myAppend scene (createFloor M 1)) 1)
-                )
+        (if (= D 1) ;Dificultad 1 (players con 2 de vida)
+            (list "PLAYING" M N E D seed (createEarth M N seed)
+                  (generatePlayer 2)
+                  (generateEnemy (createEarth M N seed) E seed)
+                  )
+            ;Dificultad 2 (players con 1 de vida)
+            (list "PLAYING" M N E D seed (createEarth M N seed)
+                  (generatePlayer 1)
+                  (generateEnemy (createEarth M N seed) E seed)
+                  )
             )
         null
-    )
-    )
-    (createSceneX N M E D seed (list N M E D) 0)
+        )
   )
