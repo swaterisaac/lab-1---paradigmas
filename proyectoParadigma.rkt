@@ -490,6 +490,29 @@
   (reverse (createEarthX M N seed 0))
   )
 
+;isEarth?: parámetros (algo)
+;desc: Función de pertenencia de earth
+;dom: algo
+;rec: booleano
+(define (earth? algo)
+  (define (earth?X algo vef)
+    (if (= vef 0)
+        (floor? (get algo vef))
+        (if (and
+             (= vef -1)
+             (> (length algo) 0)
+             )
+            (earth?X algo (- (length algo) 1))
+            (if (floor? (get algo vef))
+            (earth?X algo (- vef 1))
+            #f
+            )
+            )
+        )
+    )
+  (earth?X algo -1)
+  )
+
 ;getEarthX: parámetros (earth Nfloor)
 ;desc: Función selectora de earth. Nos entrega la coordenada X del floor número algo.
 ;dom: earth X entero
@@ -500,6 +523,7 @@
   (if (and
        (intPositive? Nfloor)
        (<= Nfloor (length earth))
+       (earth? earth)
        )
       (get (get earth Nfloor) 0)
       -1)
@@ -515,6 +539,7 @@
   (if (and
        (intPositive? Nfloor)
        (<= Nfloor (length earth))
+       (earth? earth)
        )
       (get (get earth Nfloor) 1)
       -1
@@ -530,19 +555,27 @@
 ;rec: lista de enemigos (E (enemy1) (enemy2) ... )
 (define (generateEnemy earth E seed)
   (if (and
-       (list? earth)
+       (earth? earth)
        (intPositive? E)
        (intPositive? seed)
        )
       (if (= E 0)
           null
-          (cons (createEnemy
+          (if (and
+               (not (= (modulo seed (length earth)) 0))
+               (not (= (modulo seed (length earth)) 1))
+               (not (= (modulo seed (length earth)) 2))
+               )
+            (cons (createEnemy
             (getEarthX earth (modulo seed (length earth)))
             (+ (getEarthY earth (modulo seed (length earth))) 1)
             0
             1
             )
             (generateEnemy earth (- E 1) (myRandom seed)))
+            (generateEnemy earth E (myRandom seed))
+            )
+          
           )
       null
       )
