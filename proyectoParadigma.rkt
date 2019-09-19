@@ -128,11 +128,11 @@
 ;angle: Ángulo con el que mira el player (0 a 359)
 ;life: Vidas del player
 ;rec: player. ("P" X Y1 Y2 angle)
-(define (createPlayer X Y angle)
+(define (createPlayer X Y angle life)
   (if (and (intPositive? X)
            (intPositive? Y)
            (number? angle)
-           (intPostive? life)
+           (intPositive? life)
            )
       (list "P" X Y (modulo angle 360) life)
       null)
@@ -147,7 +147,7 @@
                (intPositive? (get P 1))
                (intPositive? (get P 2))
                (number? (get P 3))
-               (intPositive? life)
+               (intPositive? (get P 4))
                )
           #t
           #f)
@@ -209,7 +209,7 @@
       (intPositive? X)
       (player? player)
       )
-      (createPlayer X (getY player) (getAngle player) (getPlayerLife player))
+      (createPlayer X (getPlayerY player) (getPlayerAngle player) (getPlayerLife player))
       (createPlayer 0 0 0 0)
       )
   )
@@ -325,6 +325,21 @@
       -1
       )
   )
+
+;Modificadoras de enemy
+;setEnemyX: parámetros (enemy X)
+;desc: Función modificadora de enemy. Modifica su coordenada en X.
+;dom: enemy X entero
+;rec: Enemy
+(define (setEnemyX enemy X)
+  (if (and
+       (enemy? enemy)
+       (intPositive? X)
+       )
+      (createEnemy X (getEnemyY enemy) (getEnemyAngle enemy) (getEnemyLife enemy))
+      (createEnemy 0 0 0 0)
+      )
+  )
       
 ;Bullet
 
@@ -378,7 +393,7 @@
 ;desc: Función selectora de bullet. Nos da su coordenada en Y.
 ;dom: bullet
 ;rec: entero, representando la coordenada en Y donde se ubica (altura)
-(define (getY bullet)
+(define (getBulletY bullet)
   (if (bullet? bullet)
       (get bullet 2)
       -1
