@@ -126,12 +126,15 @@
 ;X: Coordenada en X (suelo)
 ;Y: Coordenada más baja en Y (altura)
 ;angle: Ángulo con el que mira el player (0 a 359)
+;life: Vidas del player
 ;rec: player. ("P" X Y1 Y2 angle)
 (define (createPlayer X Y angle)
   (if (and (intPositive? X)
            (intPositive? Y)
-           (number? angle))
-      (list "P" X Y (modulo angle 360))
+           (number? angle)
+           (intPostive? life)
+           )
+      (list "P" X Y (modulo angle 360) life)
       null)
   )
 ;player?: parámetros (player)
@@ -144,12 +147,111 @@
                (intPositive? (get P 1))
                (intPositive? (get P 2))
                (number? (get P 3))
+               (intPositive? life)
                )
           #t
           #f)
       #f)
   )
+
+;Selectoras de player
 ;getPlayerX: parámetros (player)
+;desc: Función selectora de player. Nos entrega su coordenada en X.
+;dom: player
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getPlayerX player)
+  (if (player? player)
+      (get player 1)
+      -1
+      )
+  )
+
+;getPlayerY: parámetros (player)
+;desc: Función selectora de player. Nos entrega su coordenada en Y.
+;dom: Player
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getPlayerY player)
+  (if (player? player)
+      (get player 2)
+      -1
+      )
+  )
+
+;getPlayerAngle: parámetros (player)
+;desc: Función selectora de player. Nos da su angle.
+;dom: player
+;rec: numero, representando el angle que posee.
+(define (getPlayerAngle player)
+  (if (player? player)
+      (get player 3)
+      -1
+      )
+  )
+;getPlayerLife: parámetros (player)
+;desc: Función selectora de player. Nos da cuántas vidas tiene.
+;dom: player
+;rec: entero, representando las vidas que tiene.
+(define (getPlayerLife player)
+  (if (player? player)
+      (get player 4)
+      -1
+      )
+  )
+
+
+;Modificadoras de player
+;setPlayerX: parámetros (player X)
+;desc: Función modificadora de player. Modifica su X.
+;dom: player X entero
+;rec: player
+(define (setPlayerX player X)
+  (if (and
+      (intPositive? X)
+      (player? player)
+      )
+      (createPlayer X (getY player) (getAngle player) (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerY: parámetros (player Y)
+;desc: Función modificadora de player. Modifica su Y (las funciones selectoras están más adelante)
+;dom: player X entero
+;rec: player
+(define (setPlayerY player Y)
+  (if (and
+      (intPositive? Y)
+      (player? player)
+      )
+      (createPlayer (getPlayerX player) Y (getPlayerAngle player) (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerAngle: parámetros (player angle)
+;desc: Función modificadora de player. Modifica su angle (las funciones selectoras están más adelante)
+;dom: player X num
+;rec: player
+(define (setPlayerAngle player angle)
+  (if (and
+      (number? angle)
+      (player? player)
+      )
+      (createPlayer (getPlayerX player) (getPlayerY player) angle (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerLife: parámetros (player life)
+;desc: Función modificadora de player. Modifica su life.
+;dom: player X entero
+;rec: player
+(define (setPlayerLife player life)
+  (if (and
+       (intPositive? life)
+       (player? player)
+       )
+       (createPlayer (getPlayerX player) (getPlayerY player) (getPlayerAngle player) life)
+       (createPlayer 0 0 0 0)
+       )
+  )
 
 
 ;Enemy
@@ -160,10 +262,11 @@
 ;X: coordenada en X (suelo)
 ;Y: coordenada base en Y (altura)
 ;angle: ángulo con el que mira el Enemy.
+;life: vidas del enemigo.
 ;rec: Enemy
-(define (createEnemy X Y angle)
+(define (createEnemy X Y angle life)
   (if (not (null? (createPlayer X Y angle)))
-      (cons "E" (cdr (createPlayer X Y angle))) 
+      (cons "E" (cdr (createPlayer X Y angle life))) 
       null)
   )
 
@@ -181,8 +284,48 @@
        #f
       )
   )
-
-
+;Selectoras de enemy
+;getEnemyX: parámetros (enemy)
+;desc: Función selectora de enemy. Nos entrega su coordenada en X.
+;dom: enemy
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getEnemyX enemy)
+  (if (enemy? enemy)
+      (get enemy 1)
+      -1
+      )
+  )
+;getEnemyY: parámetros (enemy)
+;desc: Función selectora de Enemy. Nos da su coordenada en Y
+;dom: Enemy
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getEnemyY enemy)
+  (if (enemy? enemy)
+      (get enemy 2)
+      -1
+      )
+  )
+;getEnemyAngle: parámetros (enemy)
+;desc: Función selectora de enemy. Nos entrega su angle.
+;dom: enemy
+;rec: numero, representando el angle que posee.
+(define (getEnemyAngle enemy)
+  (if (enemy? enemy)
+      (get enemy 3)
+      -1
+      )
+  )
+;getEnemyLife: parámetros (enemy)
+;desc: Función selectora de enemy. Nos entrega las vidas que tiene.
+;dom: enemy
+;rec: entero, representando las vidas que tiene
+(define (getEnemyLife enemy)
+  (if (enemy? enemy)
+      (get enemy 4)
+      -1
+      )
+  )
+      
 ;Bullet
 
 ;createBullet: parámetros (X Y angle)
@@ -200,6 +343,7 @@
       null
       )
   )
+
 ;bullet?: parámetros (algo)
 ;desc: Función de pertenencia de bullet.
 ;dom: algo
@@ -218,61 +362,37 @@
       #f
       )
   )
-;isScene?: parámetros (algo)
-;desc: Función de pertenencia de elementos de la escena, tales como:
-;player,enemy, bullet y scene.
-;dom: algo
-;rec: booleano
-;Nota: Ni floor ni earth se consideran como parte de esta función porque tienen una estructura distinta a los demás TDA.
-;;;;EN EL CASO DE AGREGAR UN NUEVO ELEMENTO A ESCENA, SE AGREGA A ESTA FUNCIÓN TAMBIÉN.;;;;
-
-(define (isScene? X)
-  (if (or
-       (player? X)
-       (enemy? X)
-       (bullet? X)
-       )
-      #t
-      #f
+;Selectoras de bullet
+;getBulletX: parámetros (bullet)
+;desc: Función selectora de bullet. Nos entrega su coordenada en X.
+;dom: bullet
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getBulletX bullet)
+  (if (bullet? bullet)
+      (get bullet 1)
+      -1
       )
   )
 
-;Conseguir coordenadas
-
-;getX: parámetros (elemento), donde elemento es un dato relacionado con la escena
-;(player, enemy, bullet)
-;dom: elemento de la escena
-;rec: La coordenada en X donde se ubica (suelo)
-(define (getX X)
-  (if (isScene? X)
-      (get X 1)
-      null
+;getBulletY: parámetros (bullet)
+;desc: Función selectora de bullet. Nos da su coordenada en Y.
+;dom: bullet
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getY bullet)
+  (if (bullet? bullet)
+      (get bullet 2)
+      -1
       )
   )
 
-;getY: parámetros (elemento), donde elemento es un dato relacionado con la escena
-;(player, enemy, bullet)
-;dom: elemento de la escena
-;rec: La coordenada en Y donde se ubica (altura)
-(define (getY X)
-  (if (isScene? X)
-      (get X 2)
-      null
-      )
-  )
-
-;getAngle: parámetros (elemento), donde elemento es un dato relacionado con la escena
-;(player,enemy o bullet)
-;desc: Función que nos da el angle de cualquier cosa parte de la escena menos floor.
-;dom: elemento de la escena (menos floor)
-;rec: El ángulo del elemento en cuestión.
-(define (getAngle X)
-  (if (and
-       (isScene? X)
-       (not (floor? X))
-       )
-      (get X 3)
-      null
+;getAngle: parámetros (bullet)
+;desc: Función selectora de bullet. Nos da su angle.
+;dom: bullet
+;rec: numero, representando el angle que posee.
+(define (getBulletAngle bullet)
+  (if (bullet? bullet)
+      (get bullet 3)
+      -1
       )
   )
       
