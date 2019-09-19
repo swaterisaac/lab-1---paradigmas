@@ -37,6 +37,21 @@
       (cons (car lista) (myAppend (cdr lista) algo))
       )
   )
+;myRandom: parámetros (seed)
+;desc: Es una función para ir modificando seed, y en base a eso, armar la scene.
+;dom: entero
+;rec: entero
+;Estas constantes fueron sacadas de https://en.wikipedia.org/wiki/Linear_congruential_generator
+(define a 1103515245)
+(define c 12345)
+(define m 2147483648)
+;Esta función random tuma un xn y obtiene el xn+1 de la secuencia de números aleatorios.
+(define myRandom
+  (lambda
+    (xn)
+    (remainder (+ (* a xn) c) m)
+  )
+)
 
 ;Suelo: El suelo de la escena, en donde se paran los jugadores y enemigos.}
 
@@ -45,11 +60,11 @@
 ;dom:entero X entero
 ;X: Coordenada en X (nivel en el suelo)
 ;Y: Coordenada en Y (altura)
-;rec: Floor. ('F' X Y)
+;rec: Floor. (X Y)
 (define (createFloor X Y)
   (if (and (intPositive? X)
            (intPositive? Y))
-      (list "F" X Y)
+      (list X Y)
       null)
   )
 ;floor?: parámetros (algo)
@@ -59,13 +74,49 @@
 (define (floor? F)
   (if (list? F)
       (if (and
-               (equal? (car F) "F")
+               (intPositive? (get F 0))
                (intPositive? (get F 1))
-               (intPositive? (get F 2))
                )
           #t
           #f)
       #f))
+
+;createEarth (conjunto de floor)
+;parámetros: (M seed)
+;desc: Función de construcción de un conjunto de floor.
+;dom: entero X entero (positivos)
+;M: Cantidad de floor
+;seed: semilla
+;rec: conjunto de floor ("F" M (X1 Y1) (X2 Y2) ...)
+;Encapsulación: 
+;land: Si genera una isla flotante o no. 0 para no, 1 para si.
+(define (createEarth M N seed)
+  (define (createEarthX M N seed land)
+    (if (= M 0)
+        null
+        (if (= land 0)
+            (if (= (modulo seed 8) 0)
+                (cons (createFloor M 1) (createEarthX (- M 1) N (modulo seed 5) 1))
+                (cons (createFloor M 1) (createEarthX (- M 1) N (myRandom seed) 0))
+            )
+            ;Si land = 1
+            (if (= seed 0)
+                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (myRandom seed) 0)))
+                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (- seed 1) 1)))
+                )
+            )
+        )
+    )
+  (reverse (createEarthX M N seed 0))
+  )
+;earth?: parámetros(algo)
+;desc: función de pertenencia del conjunto de floor.
+;dom: algo
+;rec: booleano
+
+        
+
+  
 
 ;Player
 
@@ -169,14 +220,14 @@
   )
 ;isScene?: parámetros (algo)
 ;desc: Función de pertenencia de elementos de la escena, tales como:
-;floor,player,enemy, bullet y scene.
+;player,enemy, bullet y scene.
 ;dom: algo
 ;rec: booleano
+;Nota: Ni floor ni earth se consideran como parte de esta función porque tienen una estructura distinta a los demás TDA.
 ;;;;EN EL CASO DE AGREGAR UN NUEVO ELEMENTO A ESCENA, SE AGREGA A ESTA FUNCIÓN TAMBIÉN.;;;;
 
 (define (isScene? X)
   (if (or
-       (floor? X)
        (player? X)
        (enemy? X)
        (bullet? X)
@@ -189,7 +240,7 @@
 ;Conseguir coordenadas
 
 ;getX: parámetros (elemento), donde elemento es un dato relacionado con la escena
-;(floor, player, enemy, bullet)
+;(player, enemy, bullet)
 ;dom: elemento de la escena
 ;rec: La coordenada en X donde se ubica (suelo)
 (define (getX X)
@@ -200,7 +251,7 @@
   )
 
 ;getY: parámetros (elemento), donde elemento es un dato relacionado con la escena
-;(floor, player, enemy, bullet)
+;(player, enemy, bullet)
 ;dom: elemento de la escena
 ;rec: La coordenada en Y donde se ubica (altura)
 (define (getY X)
@@ -211,7 +262,7 @@
   )
 
 ;getAngle: parámetros (elemento), donde elemento es un dato relacionado con la escena
-;(player,enemy o bullet) (se descarta floor)
+;(player,enemy o bullet)
 ;desc: Función que nos da el angle de cualquier cosa parte de la escena menos floor.
 ;dom: elemento de la escena (menos floor)
 ;rec: El ángulo del elemento en cuestión.
