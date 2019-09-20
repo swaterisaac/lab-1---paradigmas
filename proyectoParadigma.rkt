@@ -37,6 +37,37 @@
       (cons (car lista) (myAppend (cdr lista) algo))
       )
   )
+
+;find: parámetros (lista X)
+;desc: Ve si el elemento x se encuentra dentro de la lista.
+;dom: lista x X
+;rec: booleano #t si encuentra el elemento en la lista, #f si no.
+;tipo recursión: natural
+;Encapsulación:
+;ite: Iterador para la lista. Parte de length lista - 1.
+(define (find lista X)
+  (define (findX lista X ite)
+    (if (null? lista)
+        #f
+        (if (= ite -1)
+        (findX lista X (- (length lista) 1))
+        (if (= ite 0)
+            (equal? (get lista ite) X)
+            (if (equal? (get lista ite) X)
+                #t
+                (findX lista X (- ite 1))
+                )
+            )
+        )
+    )
+
+    )
+  (findX lista X -1)
+  )
+        
+
+
+
 ;myRandom: parámetros (seed)
 ;desc: Es una función para ir modificando seed, y en base a eso, armar la scene.
 ;dom: entero
@@ -553,7 +584,7 @@
 ;E: Cantidad inicial de enemigos
 ;seed: semilla
 ;rec: lista de enemigos (E (enemy1) (enemy2) ... )
-(define (generateEnemy earth E seed)
+(define (generateEnemy earth E seed repeated)
   (if (and
        (earth? earth)
        (intPositive? E)
@@ -562,9 +593,13 @@
       (if (= E 0)
           null
           (if (and
-               (not (= (modulo seed (length earth)) 0))
-               (not (= (modulo seed (length earth)) 1))
-               (not (= (modulo seed (length earth)) 2))
+               (not (= (getEarthX earth (modulo seed (length earth))) 1))
+               (not (= (getEarthY earth (modulo seed (length earth))) 2))
+               (not (= (getEarthX earth (modulo seed (length earth))) 2));Para que no comiencen en la misma posicion de player
+               (not (= (getEarthY earth (modulo seed (length earth))) 2))
+               (not (= (getEarthX earth (modulo seed (length earth))) 3))
+               (not (= (getEarthY earth (modulo seed (length earth))) 2))
+               (not (find repeated (modulo seed (length earth))));Para que no se repita
                )
             (cons (createEnemy
             (getEarthX earth (modulo seed (length earth)))
@@ -572,14 +607,15 @@
             0
             1
             )
-            (generateEnemy earth (- E 1) (myRandom seed)))
-            (generateEnemy earth E (myRandom seed))
+            (generateEnemy earth (- E 1) (myRandom seed) (myAppend repeated (modulo seed (length earth)))))
+            (generateEnemy earth E (myRandom seed) repeated)
             )
           
           )
       null
       )
   )
+ 
 
 ;generatePlayer: parámetros (life)
 ;desc: Función que genera un conjunto de player.
@@ -613,16 +649,17 @@
          (intPositive? E)
          (and (intPositive? D) (< D 3) (> D 0))
          (intPositive? seed)
+         (> M (+ 3 E))
          )
         (if (= D 1) ;Dificultad 1 (players con 2 de vida)
             (list "PLAYING" M N E D seed (createEarth M N seed)
                   (generatePlayer 2)
-                  (generateEnemy (createEarth M N seed) E seed)
+                  (generateEnemy (createEarth M N seed) E seed null)
                   )
             ;Dificultad 2 (players con 1 de vida)
             (list "PLAYING" M N E D seed (createEarth M N seed)
                   (generatePlayer 1)
-                  (generateEnemy (createEarth M N seed) E seed)
+                  (generateEnemy (createEarth M N seed null) E seed)
                   )
             )
         null
