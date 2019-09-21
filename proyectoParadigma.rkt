@@ -634,7 +634,8 @@
   )
   
 
-;createScene:
+;createScene: parámetros (M N E D seed)
+;desc: Función constructora de scene.
 ;Dom: entero X entero X entero X entero X num
 ;N y M indican el tamaño del escenario.
 ;E la cantidad de enemigos.
@@ -659,9 +660,58 @@
             ;Dificultad 2 (players con 1 de vida)
             (list "PLAYING" M N E D seed (createEarth M N seed)
                   (generatePlayer 1)
-                  (generateEnemy (createEarth M N seed null) E seed)
+                  (generateEnemy (createEarth M N seed) E seed null)
                   )
             )
         null
         )
   )
+;checkScene: parámetros (algo)
+;desc: Función de pertenencia de scene.
+;dom: algo
+;rec: booleano
+(define (checkScene S)
+  (define (checkSceneX S ite1 ite2) ;ite1 para scene, ite2 para listas dentro de scene.
+    (if (and
+         (not (null? S))
+         (list? S)
+         (> (length S) 7)
+         (string? (get S 0))
+         (intPositive? (get S 1))
+         (intPositive? (get S 2))
+         (intPositive? (get S 3))
+         (intPositive? (get S 4))
+         (intPositive? (get S 5))
+         )
+        (cond
+        [(= ite1 -1) (checkSceneX S (- (length S) 1) (- (length (get S (- (length S) 1))) 1))]
+        [(= ite1 6) (if (<= ite2 0) ;revisamos floor
+                        (floor? (get (get S 6) 0))
+                        (and (checkSceneX S ite1 (- ite2 1)) (floor? (get (get S ite1) ite2)))
+                        )]
+        [(= ite1 7) (if (<= ite2 0) ;revisamos player
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)) (player? (get (get S ite1) 0)))
+                        (and (checkSceneX S ite1 (- ite2 1)) (player? (get (get S ite1) ite2)))
+                        )]
+        [(= ite1 8) (if (<= ite2 0) ;revisamos enemy
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)) (enemy? (get (get S ite1) 0)))
+                        (and (checkSceneX S ite1 (- ite2 1)) (enemy? (get (get S ite1) ite2)))
+                        )]
+        [(= ite1 9) (if (bullet? (get S ite1));Revisamos si hay bala
+                        (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1))
+                        #f
+                        )]
+        [else #f])
+        #f
+        )
+    )
+  (checkSceneX S -1 0)
+  )
+                    
+                             
+  
+
+
+
+                
+        
