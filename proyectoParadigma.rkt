@@ -670,8 +670,13 @@
 ;desc: Función de pertenencia de scene.
 ;dom: algo
 ;rec: booleano
+;Encapsulación:
+;ite1: Entero que nos hace iterar la lista de scene
+;ite2: Entero que nos hace iterar las listas dentro de scene
+;repeated: Lista que nos guarda cuáles posiciones han recorrido los player y enemigos,
+;aparte de revisar si están en el suelo o no.
 (define (checkScene S)
-  (define (checkSceneX S ite1 ite2) ;ite1 para scene, ite2 para listas dentro de scene.
+  (define (checkSceneX S ite1 ite2 repeated) ;ite1 para scene, ite2 para listas dentro de scene.
     (if (and
          (not (null? S))
          (list? S)
@@ -684,28 +689,54 @@
          (intPositive? (get S 5))
          )
         (cond
-        [(= ite1 -1) (checkSceneX S (- (length S) 1) (- (length (get S (- (length S) 1))) 1))]
+        [(= ite1 -1) (checkSceneX S (- (length S) 1) (- (length (get S (- (length S) 1))) 1) repeated)]
         [(= ite1 6) (if (<= ite2 0) ;revisamos floor
                         (floor? (get (get S 6) 0))
-                        (and (checkSceneX S ite1 (- ite2 1)) (floor? (get (get S ite1) ite2)))
+                        (and (checkSceneX S ite1 (- ite2 1) repeated) (floor? (get (get S ite1) ite2)))
                         )]
         [(= ite1 7) (if (<= ite2 0) ;revisamos player
-                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)) (player? (get (get S ite1) 0)))
-                        (and (checkSceneX S ite1 (- ite2 1)) (player? (get (get S ite1) ite2)))
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
+                                          (myAppend repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))))
+                             (and (player? (get (get S ite1) 0))
+                                  (find (get S 6) (list (getPlayerX (get (get S ite1) 0)) (- (getPlayerY (get (get S ite1) 0)) 1)));Player está en suelo
+                                  (not (find repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))));Player no tiene posicion repetida
+                                  ))
+                        (and (checkSceneX S ite1 (- ite2 1)
+                                          (myAppend repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))));Agrego posicion
+                             (and
+                             (player? (get (get S ite1) ite2))
+                             (find (get S 6) (list (getPlayerX (get (get S ite1) ite2)) (- (getPlayerY (get (get S ite1) ite2)) 1)))
+                             (not (find repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))))
+                             )
+                             )
                         )]
         [(= ite1 8) (if (<= ite2 0) ;revisamos enemy
-                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)) (enemy? (get (get S ite1) 0)))
-                        (and (checkSceneX S ite1 (- ite2 1)) (enemy? (get (get S ite1) ite2)))
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
+                                          (myAppend repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
+                             (and
+                             (enemy? (get (get S ite1) 0))
+                             (find (get S 6) (list (getEnemyX (get (get S ite1) 0)) (- (getEnemyY (get (get S ite1) 0)) 1)))
+                             (not (find repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
+                             )
+                             )
+                        (and (checkSceneX S ite1 (- ite2 1)
+                                          (myAppend repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
+                             (and
+                              (enemy? (get (get S ite1) ite2))
+                              (find (get S 6) (list (getEnemyX (get (get S ite1) ite2)) (- (getEnemyY (get (get S ite1) ite2)) 1)))
+                              (not (find repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
+                              )
+                             )
                         )]
         [(= ite1 9) (if (bullet? (get S ite1));Revisamos si hay bala
-                        (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1))
+                        (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1) repeated)
                         #f
                         )]
         [else #f])
         #f
         )
     )
-  (checkSceneX S -1 0)
+  (checkSceneX S -1 0 null)
   )
                     
                              
