@@ -632,8 +632,159 @@
       null
       )
   )
-  
+;players?: parámetros (conjuntoPlayer)
+;desc: Función de pertenencia del conjunto de player.
+;dom: conjunto de player
+;rec: booleano
+(define (players? P)
+  (if (and
+       (list? P)
+       (<= (length P) 3)
+       (or (null? (get P 0)) (player? (get P 0)))
+       (or (null? (get P 1)) (player? (get P 1)))
+       (or (null? (get P 2)) (player? (get P 2)))
+       )
+      #t
+      #f
+      )
+  )
+;getPlayers: parámetros (conjuntoPlayer N)
+;desc: Funcion selectora del conjunto de player. Nos permite obtener el player N° algo.
+;dom: conjuntoPlayer X entero
+;N: Número de player que queremos conseguir (0 1 o 2)
+;rec: player
+(define (getPlayers P N)
+  (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       )
+      (get P N)
+      null
+      )
+  )
+;Modificadora de players:
+;setPlayersX: parámetros (conjuntoPlayer N X)
+;desc: Función modificadora del conjunto de player. Modifica la coordenada en X de uno de ellos.
+;dom: conjuntoPlayer X entero X entero
+;N: número de player que queremos modificar
+;X: Nueva coordenada en X
+;rec: conjuntoPlayer
+(define (setPlayersX P N X)
+  (define (setPlayersXX P N X ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (intPositive? X)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer X (getPlayerY (getPlayers P ite)) (getPlayerAngle (getPlayers P ite)) (getPlayerLife(getPlayers P ite)))
+                       (setPlayersXX P N X (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersXX P N X (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersXX P N X 0)
+  )
+       
+(define (setPlayersY P N Y)
+  (define (setPlayersYX P N Y ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (intPositive? Y)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) Y (getPlayerAngle (getPlayers P ite)) (getPlayerLife(getPlayers P ite)))
+                       (setPlayersYX P N Y (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersYX P N Y (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersYX P N Y 0)
+  )
 
+(define (setPlayersAngle P N angle)
+  (define (setPlayersAngleX P N angle ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (number? angle)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) (getPlayerY (getPlayers P ite)) angle (getPlayerLife(getPlayers P ite)))
+                       (setPlayersAngleX P N angle (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersAngleX P N angle (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersAngleX P N angle 0)
+  )
+
+(define (setPlayersLife P N life)
+  (define (setPlayersLifeX P N life ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (intPositive? life)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) (getPlayerY (getPlayers P ite)) (getPlayerAngle (getPlayers P ite)) life)
+                       (setPlayersLifeX P N life (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersLifeX P N life (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersLifeX P N life 0)
+  )
+
+;otras funciones players
+;deletePlayer: parámetro (conjuntoPlayer N)
+;desc: Borra un player indicado del conjunto de players.
+;dom: conjuntoPlayers X Entero
+;N: Número del player que queremos borrar dentro del conjunto
+;Encapsulación:
+;ite: Iterador de la recursión
+;rec: conjuntoPlayers
+(define (deletePlayer P N)
+  (define (deletePlayerX P N ite)
+    (if (and
+         (players? P)
+         (< N 3)
+         (>= N 0)
+         )
+        (cond
+          [(= ite N) (deletePlayer P N (+ ite 1))]
+          [(= ite (length P)) null]
+          [else (cons (getPlayers P ite) (deletePlayer P N (+ ite 1)))]
+          )
+        null
+        )
+    )
+  (deletePlayerX P N 0)
+  )
+    
+    
 ;createScene: parámetros (M N E D seed)
 ;desc: Función constructora de scene.
 ;Dom: entero X entero X entero X entero X num
@@ -738,6 +889,112 @@
     )
   (checkSceneX S -1 0 null)
   )
+;Selectoras de Scene:
+;getSceneStatus: parámetros (scene)
+;desc: Nos entrega el estado de una escena. ("PLAYING","WIN","LOSE" o "DRAW")
+;dom: Scene
+;rec: Estado de scene. (string)
+(define (getSceneStatus scene)
+  (if (checkScene scene)
+      (get scene 0)
+      "null"
+      )
+  )
+;getSceneM: parámetros (scene)
+;desc: Nos entrega la cantidad de suelo que tiene un scene.
+;dom: Scene
+;rec: Cantidad de suelo que tiene. (entero)
+(define (getSceneM scene)
+  (if (checkScene scene)
+      (get scene 1)
+      -1
+      )
+  )
+
+;getSceneN: parámetros (scene)
+;desc: Nos entrega la cantidad de altura que tiene un scene.
+;dom: Scene
+;rec: Cantidad de altura que tiene. (entero)
+(define (getSceneN scene)
+  (if (checkScene scene)
+      (get scene 2)
+      -1
+      )
+  )
+;getSceneE: parámetros (scene)
+;desc: Nos entrega la cantidad de enemigos que tiene un scene.
+;dom: Scene
+;rec: Cantidad de enemigos que tiene. (entero)
+(define (getSceneE scene)
+  (if (checkScene scene)
+      (get scene 3)
+      -1
+      )
+  )
+;getSceneD: parámetros (scene)
+;desc: Nos entrega la dificultad de una scene.
+;dom: Scene
+;rec: Dificultad de la scene. (1 o 2)
+(define (getSceneD scene)
+  (if (checkScene scene)
+      (get scene 4)
+      -1
+      )
+  )
+;getSceneSeed: parámetros (scene)
+;desc: Nos entrega la seed de una scene
+;dom: Scene
+;rec: seed de la scene (entero)
+(define (getSceneSeed scene)
+  (if (checkScene scene)
+      (get scene 5)
+      -1
+      )
+  )
+;getSceneEarth: parámetros (scene)
+;desc: Nos entrega el conjunto de suelo de una scene.
+;dom: Scene
+;rec: Earth (lista de floor)
+(define (getSceneEarth scene)
+  (if (checkScene scene)
+      (get scene 6)
+      null
+      )
+  )
+;getScenePlayers: parámetros (scene)
+;desc: Nos entrega el conjunto de enemigos de una scene.
+;dom: scene
+;rec: enemies
+(define (getScenePlayers scene)
+  (if (checkScene scene)
+      (get scene 7)
+      null
+      )
+  )
+;getSceneEnemies: parámetros (scene)
+;desc: Nos entrega el conjunto de enemigos de una scene.
+;dom: scene
+;rec: enemies
+(define (getSceneEnemies scene)
+  (if (checkScene scene)
+      (get scene 8)
+      null
+      )
+  )
+;getSceneBullet: parámetros (scene)
+;desc: Nos entrega la bullet (si es que hay) de una scene, si no la hay nos entrega null de todos modos.
+;dom: scene
+;rec: bullet (si la hay)
+(define (getSceneBullet scene)
+  (if (checkScene scene)
+      (get scene 9);Tal como está hecha la función get, nos entregaría null de todos modos.
+      null
+      )
+  )
+  
+
+
+
                     
                              
   
