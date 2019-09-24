@@ -1,0 +1,114 @@
+#lang racket
+(require "funcionesGenerales.rkt")
+
+;Bullet
+
+;createBullet: parámetros (X Y angle)
+;desc: Función constructora de bullet (representación de proyectil)
+;dom: entero X entero X número
+;rec: Bullet.
+
+(define (createBullet X Y angle)
+  (if (and
+         (intPositive? X)
+         (intPositive? Y)
+         (number? angle)
+      )
+      (list "B" X Y (modulo angle 360))
+      null
+      )
+  )
+
+;bullet?: parámetros (algo)
+;desc: Función de pertenencia de bullet.
+;dom: algo
+;rec: booleano
+(define (bullet? B)
+  (if (and
+      (list? B)
+      (equal? "B" (car B))
+      (intPositive? (get B 1))
+      (intPositive? (get B 2))
+      (number? (get B 3))
+      )
+      #t
+      #f
+      )
+  )
+;Selectoras de bullet
+;getBulletX: parámetros (bullet)
+;desc: Función selectora de bullet. Nos entrega su coordenada en X.
+;dom: bullet
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getBulletX bullet)
+  (if (bullet? bullet)
+      (get bullet 1)
+      -1
+      )
+  )
+
+;getBulletY: parámetros (bullet)
+;desc: Función selectora de bullet. Nos da su coordenada en Y.
+;dom: bullet
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getBulletY bullet)
+  (if (bullet? bullet)
+      (get bullet 2)
+      -1
+      )
+  )
+
+;getBulletAngle: parámetros (bullet)
+;desc: Función selectora de bullet. Nos da su angle.
+;dom: bullet
+;rec: numero, representando el angle que posee.
+(define (getBulletAngle bullet)
+  (if (bullet? bullet)
+      (get bullet 3)
+      -1
+      )
+  )
+
+;Modificadoras de bullet
+;setBulletX: parámetros (bullet X)
+;desc: Función modificadora de bullet. Modifica su coordenada en X
+;dom: bullet X entero
+;rec: bullet
+(define (setBulletX bullet X)
+  (if (and
+       (bullet? bullet)
+       (intPositive? X)
+       )
+      (createBullet X (getBulletY bullet) (getBulletAngle bullet))
+      (createBullet 0 0 0)
+      )
+  )
+;setBulletY: parámetros (bullet Y)
+;desc: Función modificadora de bullet. Modifica su coordenada en Y.
+;dom: bullet X entero
+;rec: bullet
+(define (setBulletY bullet Y)
+  (if (and
+       (bullet? bullet)
+       (intPositive? Y)
+       )
+      (createBullet (getBulletX bullet) Y (getBulletAngle bullet))
+      (createBullet 0 0 0)
+      )
+  )
+;setBulletAngle: parámetros (bullet angle)
+;desc: Función modificadora de bullet. Modifica su angle.
+;dom: bullet x num
+;rec: bullet
+(define (setBulletAngle bullet angle)
+  (if (and
+       (bullet? bullet)
+       (number? angle)
+       )
+      (createBullet (getBulletX bullet) (getBulletY bullet) angle)
+      (createBullet 0 0 0)
+      )
+  )
+
+;Para llamar en otros archivos
+(provide (all-defined-out))

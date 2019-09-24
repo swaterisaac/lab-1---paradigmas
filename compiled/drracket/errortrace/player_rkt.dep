@@ -1,0 +1,1 @@
+("6.11" ("fca89bfd7dc1edeec9a9003ff1d4e6bae48e6791" . "b094c1db2d82d36a25dec327246b596dae4ef7aa") #"E:\\repositorios\\lab-1---paradigmas\\funcionesGenerales.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

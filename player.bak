@@ -1,0 +1,138 @@
+#lang racket
+(require "funcionesGenerales.rkt")
+
+;Player
+
+;createPlayer: parámetros (X Y angle)
+;desc: Función constructora de player. OBS: Suma 1 de altura ya que ocupa 2 espacios.
+;dom: entero X entero X num
+;X: Coordenada en X (suelo)
+;Y: Coordenada más baja en Y (altura)
+;angle: Ángulo con el que mira el player (0 a 359)
+;life: Vidas del player
+;rec: player. ("P" X Y1 Y2 angle)
+(define (createPlayer X Y angle life)
+  (if (and (intPositive? X)
+           (intPositive? Y)
+           (number? angle)
+           (intPositive? life)
+           )
+      (list "P" X Y (modulo angle 360) life)
+      null)
+  )
+;player?: parámetros (player)
+;desc: Función de pertenencia de player.
+;dom: Cualquier dato
+;rec: booleano
+(define (player? P)
+  (if (and
+       (list? P)
+       (= (length P) 5)
+       (equal? (car P) "P")
+       (intPositive? (get P 1))
+       (intPositive? (get P 2))
+       (number? (get P 3))
+       (intPositive? (get P 4))
+       )
+      #t
+      #f)
+  )
+
+;Selectoras de player
+;getPlayerX: parámetros (player)
+;desc: Función selectora de player. Nos entrega su coordenada en X.
+;dom: player
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getPlayerX player)
+  (if (player? player)
+      (get player 1)
+      -1
+      )
+  )
+
+;getPlayerY: parámetros (player)
+;desc: Función selectora de player. Nos entrega su coordenada en Y.
+;dom: Player
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getPlayerY player)
+  (if (player? player)
+      (get player 2)
+      -1
+      )
+  )
+
+;getPlayerAngle: parámetros (player)
+;desc: Función selectora de player. Nos da su angle.
+;dom: player
+;rec: numero, representando el angle que posee.
+(define (getPlayerAngle player)
+  (if (player? player)
+      (get player 3)
+      -1
+      )
+  )
+;getPlayerLife: parámetros (player)
+;desc: Función selectora de player. Nos da cuántas vidas tiene.
+;dom: player
+;rec: entero, representando las vidas que tiene.
+(define (getPlayerLife player)
+  (if (player? player)
+      (get player 4)
+      -1
+      )
+  )
+
+
+;Modificadoras de player
+;setPlayerX: parámetros (player X)
+;desc: Función modificadora de player. Modifica su X.
+;dom: player X entero
+;rec: player
+(define (setPlayerX player X)
+  (if (and
+      (intPositive? X)
+      (player? player)
+      )
+      (createPlayer X (getPlayerY player) (getPlayerAngle player) (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerY: parámetros (player Y)
+;desc: Función modificadora de player. Modifica su Y (las funciones selectoras están más adelante)
+;dom: player X entero
+;rec: player
+(define (setPlayerY player Y)
+  (if (and
+      (intPositive? Y)
+      (player? player)
+      )
+      (createPlayer (getPlayerX player) Y (getPlayerAngle player) (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerAngle: parámetros (player angle)
+;desc: Función modificadora de player. Modifica su angle (las funciones selectoras están más adelante)
+;dom: player X num
+;rec: player
+(define (setPlayerAngle player angle)
+  (if (and
+      (number? angle)
+      (player? player)
+      )
+      (createPlayer (getPlayerX player) (getPlayerY player) angle (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerLife: parámetros (player life)
+;desc: Función modificadora de player. Modifica su life.
+;dom: player X entero
+;rec: player
+(define (setPlayerLife player life)
+  (if (and
+       (intPositive? life)
+       (player? player)
+       )
+       (createPlayer (getPlayerX player) (getPlayerY player) (getPlayerAngle player) life)
+       (createPlayer 0 0 0 0)
+       )
+  )
