@@ -212,8 +212,99 @@
       null
       )
   )
-  
 
+;Modificadoras de Scene
+;setScenePlayer: parámetros (scene N M O)
+;desc: Modifica uno de los player del conjuntoPlayer de Scene.
+;dom: scene  X entero X entero X entero
+;N: Número de player que queremos modificar.
+;M: Valor a modificar
+;O: Lo que queremos modificar de ese player
+;O = 1: Modificamos su coordenada en X
+;O = 2: Modificamos su coordenada en Y
+;O = 3: Modificamos su angle
+;O = 4: Modificamos su vida
+(define (setScenePlayer scene N M O)
+  (if (and
+       (checkScene scene)
+       (intPositive? N)
+       (>= N 0)
+       (< N 3)
+       (intPositive? M)
+       (intPositive? O)
+       )
+      (cond
+        [(= O 1) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (setPlayersX (getScenePlayers scene) N M)
+                       (getSceneEnemies scene))]
+        [(= O 2) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (setPlayersY (getScenePlayers scene) N M)
+                       (getSceneEnemies scene))]
+        [(= O 3) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (setPlayersAngle (getScenePlayers scene) N M)
+                       (getSceneEnemies scene))]
+        [(= O 4) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (setPlayersLife (getScenePlayers scene) N M)
+                       (getSceneEnemies scene))]
+        [else scene]
+        )
+      scene
+      )
+  )
+
+;setSceneEnemy: parámetros (scene N M O)
+;desc: Modifica uno de los enemy del conjuntoEnemy de Scene.
+;dom: scene X entero X entero X entero
+;N: Número de enemy que queremos modificar.
+;M: Valor a modificar:
+;O: Lo que queremos modificar de ese enemy.
+;O: Lo que queremos modificar de ese player
+;O = 1: Modificamos su coordenada en X
+;O = 2: Modificamos su coordenada en Y
+;O = 3: Modificamos su angle
+;O = 4: Modificamos su vida
+(define (setSceneEnemy scene N M O)
+  (if (and
+       (checkScene scene)
+       (intPositive? N)
+       (>= N 0)
+       (< N (getSceneE scene))
+       (intPositive? M)
+       (intPositive? O)
+       )
+      (cond
+        [(= O 1) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (getScenePlayers scene)
+                       (setEnemiesX (getSceneEnemies scene) N M))]
+        [(= O 2) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (getScenePlayers scene)
+                       (setEnemiesY (getSceneEnemies scene) N M))]
+        [(= O 3) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (getScenePlayers scene)
+                       (setEnemiesAngle (getSceneEnemies scene) N M))]
+        [(= O 4) (list (getSceneStatus scene) (getSceneM scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
+                       (getSceneEarth scene) (getScenePlayers scene)
+                       (setEnemiesLife (getSceneEnemies scene) N M))]
+        [else scene]
+        )
+      scene
+      )
+  )
+      
+      
+
+
+
+;Scene1:
+(define S1 (createScene 100 20 3 1 123))
 ;Para llamar en otros archivos
 (provide (all-defined-out))
 
