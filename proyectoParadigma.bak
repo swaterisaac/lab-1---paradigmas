@@ -1,7 +1,1005 @@
 #lang racket
-;createScene:
-;Dom: cuatro números enteros positivos y un número entero.
+;funciones generales
+
+;intPositive?: Parámetros (algo)
+;desc: Comprueba si un número es entero positivo (aunque incluye el 0)
+;dom: Cualquier tipo de dato
+;rec: Booleano
+(define (intPositive? x)
+  (if (integer? x)
+      (if (>= x 0)
+          #t
+          #f)
+      #f)
+  )
+;get: Parámetros (lista num)
+;desc: Nos da el elemento <num> de la <lista>
+;dom: lista X entero
+;rec: algo (el elemento que saquemos de la lista)
+(define (get lista num)
+  (if (list? lista)
+      (if (null? lista)
+          lista
+          (if (= num 0)
+              (car lista)
+              (get (cdr lista) (- num 1))
+              )
+          )
+      null)
+  )
+;myAppend: parámetros (lista algo)
+;desc: Agrega algo al final de la lista.
+;dom: lista X algo
+;rec: lista
+(define (myAppend lista algo)
+  (if (null? lista)
+      (cons algo null)
+      (cons (car lista) (myAppend (cdr lista) algo))
+      )
+  )
+
+;find: parámetros (lista X)
+;desc: Ve si el elemento x se encuentra dentro de la lista.
+;dom: lista x X
+;rec: booleano #t si encuentra el elemento en la lista, #f si no.
+;tipo recursión: natural
+;Encapsulación:
+;ite: Iterador para la lista. Parte de length lista - 1.
+(define (find lista X)
+  (define (findX lista X ite)
+    (if (null? lista)
+        #f
+        (if (= ite -1)
+        (findX lista X (- (length lista) 1))
+        (if (= ite 0)
+            (equal? (get lista ite) X)
+            (if (equal? (get lista ite) X)
+                #t
+                (findX lista X (- ite 1))
+                )
+            )
+        )
+    )
+
+    )
+  (findX lista X -1)
+  )
+        
+
+
+
+;myRandom: parámetros (seed)
+;desc: Es una función para ir modificando seed, y en base a eso, armar la scene.
+;dom: entero
+;rec: entero
+;Estas constantes fueron sacadas de https://en.wikipedia.org/wiki/Linear_congruential_generator
+(define a 1103515245)
+(define c 12345)
+(define m 2147483648)
+;Esta función random tuma un xn y obtiene el xn+1 de la secuencia de números aleatorios.
+(define myRandom
+  (lambda
+    (xn)
+    (remainder (+ (* a xn) c) m)
+  )
+  )
+
+;Suelo: El suelo de la escena, en donde se paran los jugadores y enemigos.}
+
+;createFloor: parámetros (X Y)
+;desc: Función constructora de floor
+;dom:entero X entero
+;X: Coordenada en X (nivel en el suelo)
+;Y: Coordenada en Y (altura)
+;rec: Floor. (X Y)
+(define (createFloor X Y)
+  (if (and (intPositive? X)
+           (intPositive? Y))
+      (list X Y)
+      null)
+  )
+;floor?: parámetros (algo)
+;desc: Función de pertenencia de floor
+;dom: cualquier tipo de dato
+;rec: Booleano.
+(define (floor? F)
+  (if (list? F)
+      (if (and
+               (intPositive? (get F 0))
+               (intPositive? (get F 1))
+               )
+          #t
+          #f)
+      #f))
+
+
+;earth?: parámetros(algo)
+;desc: función de pertenencia del conjunto de floor.
+;dom: algo
+;rec: booleano
+
+
+;Player
+
+;createPlayer: parámetros (X Y angle)
+;desc: Función constructora de player. OBS: Suma 1 de altura ya que ocupa 2 espacios.
+;dom: entero X entero X num
+;X: Coordenada en X (suelo)
+;Y: Coordenada más baja en Y (altura)
+;angle: Ángulo con el que mira el player (0 a 359)
+;life: Vidas del player
+;rec: player. ("P" X Y1 Y2 angle)
+(define (createPlayer X Y angle life)
+  (if (and (intPositive? X)
+           (intPositive? Y)
+           (number? angle)
+           (intPositive? life)
+           )
+      (list "P" X Y (modulo angle 360) life)
+      null)
+  )
+;player?: parámetros (player)
+;desc: Función de pertenencia de player.
+;dom: Cualquier dato
+;rec: booleano
+(define (player? P)
+  (if (list? P)
+      (if (and (equal? (car P) "P")
+               (intPositive? (get P 1))
+               (intPositive? (get P 2))
+               (number? (get P 3))
+               (intPositive? (get P 4))
+               )
+          #t
+          #f)
+      #f)
+  )
+
+;Selectoras de player
+;getPlayerX: parámetros (player)
+;desc: Función selectora de player. Nos entrega su coordenada en X.
+;dom: player
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getPlayerX player)
+  (if (player? player)
+      (get player 1)
+      -1
+      )
+  )
+
+;getPlayerY: parámetros (player)
+;desc: Función selectora de player. Nos entrega su coordenada en Y.
+;dom: Player
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getPlayerY player)
+  (if (player? player)
+      (get player 2)
+      -1
+      )
+  )
+
+;getPlayerAngle: parámetros (player)
+;desc: Función selectora de player. Nos da su angle.
+;dom: player
+;rec: numero, representando el angle que posee.
+(define (getPlayerAngle player)
+  (if (player? player)
+      (get player 3)
+      -1
+      )
+  )
+;getPlayerLife: parámetros (player)
+;desc: Función selectora de player. Nos da cuántas vidas tiene.
+;dom: player
+;rec: entero, representando las vidas que tiene.
+(define (getPlayerLife player)
+  (if (player? player)
+      (get player 4)
+      -1
+      )
+  )
+
+
+;Modificadoras de player
+;setPlayerX: parámetros (player X)
+;desc: Función modificadora de player. Modifica su X.
+;dom: player X entero
+;rec: player
+(define (setPlayerX player X)
+  (if (and
+      (intPositive? X)
+      (player? player)
+      )
+      (createPlayer X (getPlayerY player) (getPlayerAngle player) (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerY: parámetros (player Y)
+;desc: Función modificadora de player. Modifica su Y (las funciones selectoras están más adelante)
+;dom: player X entero
+;rec: player
+(define (setPlayerY player Y)
+  (if (and
+      (intPositive? Y)
+      (player? player)
+      )
+      (createPlayer (getPlayerX player) Y (getPlayerAngle player) (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerAngle: parámetros (player angle)
+;desc: Función modificadora de player. Modifica su angle (las funciones selectoras están más adelante)
+;dom: player X num
+;rec: player
+(define (setPlayerAngle player angle)
+  (if (and
+      (number? angle)
+      (player? player)
+      )
+      (createPlayer (getPlayerX player) (getPlayerY player) angle (getPlayerLife player))
+      (createPlayer 0 0 0 0)
+      )
+  )
+;setPlayerLife: parámetros (player life)
+;desc: Función modificadora de player. Modifica su life.
+;dom: player X entero
+;rec: player
+(define (setPlayerLife player life)
+  (if (and
+       (intPositive? life)
+       (player? player)
+       )
+       (createPlayer (getPlayerX player) (getPlayerY player) (getPlayerAngle player) life)
+       (createPlayer 0 0 0 0)
+       )
+  )
+
+
+;Enemy
+
+;createEnemy: parámetros (X Y angle)
+;desc: Función constructora de un enemy.
+;dom: entero X entero X num
+;X: coordenada en X (suelo)
+;Y: coordenada base en Y (altura)
+;angle: ángulo con el que mira el Enemy.
+;life: vidas del enemigo.
+;rec: Enemy
+(define (createEnemy X Y angle life)
+  (if (not (null? (createPlayer X Y angle life)))
+      (cons "E" (cdr (createPlayer X Y angle life))) 
+      null)
+  )
+
+;enemy?: parámetros (algo)
+;desc: Función de pertenencia de enemy.
+;dom: algo
+;rec: bool
+(define (enemy? E)
+  (if (and
+       (list? E)
+       (equal? (car E) "E")
+       (player? (cons "P" (cdr E)))
+       )
+       #t
+       #f
+      )
+  )
+;Selectoras de enemy
+;getEnemyX: parámetros (enemy)
+;desc: Función selectora de enemy. Nos entrega su coordenada en X.
+;dom: enemy
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getEnemyX enemy)
+  (if (enemy? enemy)
+      (get enemy 1)
+      -1
+      )
+  )
+;getEnemyY: parámetros (enemy)
+;desc: Función selectora de Enemy. Nos da su coordenada en Y
+;dom: Enemy
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getEnemyY enemy)
+  (if (enemy? enemy)
+      (get enemy 2)
+      -1
+      )
+  )
+;getEnemyAngle: parámetros (enemy)
+;desc: Función selectora de enemy. Nos entrega su angle.
+;dom: enemy
+;rec: numero, representando el angle que posee.
+(define (getEnemyAngle enemy)
+  (if (enemy? enemy)
+      (get enemy 3)
+      -1
+      )
+  )
+;getEnemyLife: parámetros (enemy)
+;desc: Función selectora de enemy. Nos entrega las vidas que tiene.
+;dom: enemy
+;rec: entero, representando las vidas que tiene
+(define (getEnemyLife enemy)
+  (if (enemy? enemy)
+      (get enemy 4)
+      -1
+      )
+  )
+
+;Modificadoras de enemy
+;setEnemyX: parámetros (enemy X)
+;desc: Función modificadora de enemy. Modifica su coordenada en X.
+;dom: enemy X entero
+;rec: Enemy
+(define (setEnemyX enemy X)
+  (if (and
+       (enemy? enemy)
+       (intPositive? X)
+       )
+      (createEnemy X (getEnemyY enemy) (getEnemyAngle enemy) (getEnemyLife enemy))
+      (createEnemy 0 0 0 0)
+      )
+  )
+;setEnemyY: parámetros (enemy Y)
+;desc: Función modificadora de enemy. Modifica su coordenada en Y.
+;dom: enemy X entero
+;rec: Enemy
+(define (setEnemyY enemy Y)
+  (if (and
+       (enemy? enemy)
+       (intPositive? Y)
+       )
+      (createEnemy (getEnemyX enemy) Y (getEnemyAngle enemy) (getEnemyLife enemy))
+      (createEnemy 0 0 0 0)
+      )
+  )
+;setEnemyAngle: parámetros (enemy angle)
+;desc: Función modificadora de enemy. Modifica su angle.
+;dom: enemy X numero
+;rec: Enemy
+(define (setEnemyAngle enemy angle)
+  (if (and
+       (enemy? enemy)
+       (number? angle)
+       )
+      (createEnemy (getEnemyX enemy) (getEnemyY enemy) angle (getEnemyLife enemy))
+      (createEnemy 0 0 0 0)
+      )
+  )
+;setEnemyLife: parámetros (enemy life)
+;desc: Función modificadora de enemy. Modifica su vida.
+;dom: enemy X life
+;rec: Enemy
+(define (setEnemyLife enemy life)
+  (if (and
+       (enemy? enemy)
+       (intPositive? life)
+       )
+      (createEnemy (getEnemyX enemy) (getEnemyY enemy) (getEnemyAngle enemy) life)
+      (createEnemy 0 0 0 0)
+      )
+  )
+      
+;Bullet
+
+;createBullet: parámetros (X Y angle)
+;desc: Función constructora de bullet (representación de proyectil)
+;dom: entero X entero X número
+;rec: Bullet.
+
+(define (createBullet X Y angle)
+  (if (and
+         (intPositive? X)
+         (intPositive? Y)
+         (number? angle)
+      )
+      (list "B" X Y (modulo angle 360))
+      null
+      )
+  )
+
+;bullet?: parámetros (algo)
+;desc: Función de pertenencia de bullet.
+;dom: algo
+;rec: booleano
+(define (bullet? B)
+  (if (list? B)
+      (if (and
+           (equal? "B" (car B))
+           (intPositive? (get B 1))
+           (intPositive? (get B 2))
+           (number? (get B 3))
+          )
+          #t
+          #f
+          )
+      #f
+      )
+  )
+;Selectoras de bullet
+;getBulletX: parámetros (bullet)
+;desc: Función selectora de bullet. Nos entrega su coordenada en X.
+;dom: bullet
+;rec: entero, representando la coordenada en X donde se ubica (suelo)
+(define (getBulletX bullet)
+  (if (bullet? bullet)
+      (get bullet 1)
+      -1
+      )
+  )
+
+;getBulletY: parámetros (bullet)
+;desc: Función selectora de bullet. Nos da su coordenada en Y.
+;dom: bullet
+;rec: entero, representando la coordenada en Y donde se ubica (altura)
+(define (getBulletY bullet)
+  (if (bullet? bullet)
+      (get bullet 2)
+      -1
+      )
+  )
+
+;getBulletAngle: parámetros (bullet)
+;desc: Función selectora de bullet. Nos da su angle.
+;dom: bullet
+;rec: numero, representando el angle que posee.
+(define (getBulletAngle bullet)
+  (if (bullet? bullet)
+      (get bullet 3)
+      -1
+      )
+  )
+
+;Modificadoras de bullet
+;setBulletX: parámetros (bullet X)
+;desc: Función modificadora de bullet. Modifica su coordenada en X
+;dom: bullet X entero
+;rec: bullet
+(define (setBulletX bullet X)
+  (if (and
+       (bullet? bullet)
+       (intPositive? X)
+       )
+      (createBullet X (getBulletY bullet) (getBulletAngle bullet))
+      (createBullet 0 0 0)
+      )
+  )
+;setBulletY: parámetros (bullet Y)
+;desc: Función modificadora de bullet. Modifica su coordenada en Y.
+;dom: bullet X entero
+;rec: bullet
+(define (setBulletY bullet Y)
+  (if (and
+       (bullet? bullet)
+       (intPositive? Y)
+       )
+      (createBullet (getBulletX bullet) Y (getBulletAngle bullet))
+      (createBullet 0 0 0)
+      )
+  )
+;setBulletAngle: parámetros (bullet angle)
+;desc: Función modificadora de bullet. Modifica su angle.
+;dom: bullet x num
+;rec: bullet
+(define (setBulletAngle bullet angle)
+  (if (and
+       (bullet? bullet)
+       (number? angle)
+       )
+      (createBullet (getBulletX bullet) (getBulletY bullet) angle)
+      (createBullet 0 0 0)
+      )
+  )
+
+;createEarth: (conjunto de floor)
+;parámetros: (M seed)
+;desc: Función de construcción de un conjunto de floor.
+;dom: entero X entero (positivos)
+;M: Cantidad de floor
+;seed: semilla
+;rec: conjunto de floor ("F" M (X1 Y1) (X2 Y2) ...)
+;Encapsulación: 
+;land: Si genera una isla flotante o no. 0 para no, 1 para si.
+(define (createEarth M N seed)
+  (define (createEarthX M N seed land)
+    (if (= M 0)
+        null
+        (if (= land 0)
+            (if (= (modulo seed 8) 0)
+                (cons (createFloor M 1) (createEarthX (- M 1) N (modulo seed 5) 1))
+                (cons (createFloor M 1) (createEarthX (- M 1) N (myRandom seed) 0))
+            )
+            ;Si land = 1
+            (if (= seed 0)
+                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (myRandom seed) 0)))
+                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (- seed 1) 1)))
+                )
+            )
+        )
+    )
+  (reverse (createEarthX M N seed 0))
+  )
+
+;isEarth?: parámetros (algo)
+;desc: Función de pertenencia de earth
+;dom: algo
+;rec: booleano
+(define (earth? algo)
+  (define (earth?X algo vef)
+    (if (= vef 0)
+        (floor? (get algo vef))
+        (if (and
+             (= vef -1)
+             (> (length algo) 0)
+             )
+            (earth?X algo (- (length algo) 1))
+            (if (floor? (get algo vef))
+            (earth?X algo (- vef 1))
+            #f
+            )
+            )
+        )
+    )
+  (earth?X algo -1)
+  )
+
+;getEarthX: parámetros (earth Nfloor)
+;desc: Función selectora de earth. Nos entrega la coordenada X del floor número algo.
+;dom: earth X entero
+;earth: conjunto de floor
+;Nfloor: Número de floor dentro de earth en donde queremos sacar su coordenada en X.
+;rec: entero, que representa la coordenada en X
+(define (getEarthX earth Nfloor)
+  (if (and
+       (intPositive? Nfloor)
+       (<= Nfloor (length earth))
+       (earth? earth)
+       )
+      (get (get earth Nfloor) 0)
+      -1)
+  )
+
+;getEarthY: parámetros (earth Nfloor)
+;desc: Función selectora de earth. Nos entrega la coordenada X del floor número algo.
+;dom: earth X entero
+;earth: conjunto de floor
+;Nfloor: Número de floor dentro de earth en donde queremos sacar su coordenada en Y.
+;rec: entero, que representa la coordenada en Y.
+(define (getEarthY earth Nfloor)
+  (if (and
+       (intPositive? Nfloor)
+       (<= Nfloor (length earth))
+       (earth? earth)
+       )
+      (get (get earth Nfloor) 1)
+      -1
+      )
+  )
+
+;generateEnemy: parámetros (earth E seed)
+;desc: Crea un conjunto de enemigos inicial.
+;dom: earth X entero
+;earth: Conjunto de floor
+;E: Cantidad inicial de enemigos
+;seed: semilla
+;rec: lista de enemigos (E (enemy1) (enemy2) ... )
+(define (generateEnemy earth E seed repeated)
+  (if (and
+       (earth? earth)
+       (intPositive? E)
+       (intPositive? seed)
+       )
+      (if (= E 0)
+          null
+          (if (and
+               (not (= (getEarthX earth (modulo seed (length earth))) 1))
+               (not (= (getEarthY earth (modulo seed (length earth))) 2))
+               (not (= (getEarthX earth (modulo seed (length earth))) 2));Para que no comiencen en la misma posicion de player
+               (not (= (getEarthY earth (modulo seed (length earth))) 2))
+               (not (= (getEarthX earth (modulo seed (length earth))) 3))
+               (not (= (getEarthY earth (modulo seed (length earth))) 2))
+               (not (find repeated (modulo seed (length earth))));Para que no se repita
+               )
+            (cons (createEnemy
+            (getEarthX earth (modulo seed (length earth)))
+            (+ (getEarthY earth (modulo seed (length earth))) 1)
+            0
+            1
+            )
+            (generateEnemy earth (- E 1) (myRandom seed) (myAppend repeated (modulo seed (length earth)))))
+            (generateEnemy earth E (myRandom seed) repeated)
+            )
+          
+          )
+      null
+      )
+  )
+ 
+
+;generatePlayer: parámetros (life)
+;desc: Función que genera un conjunto de player.
+;dom: entero
+;life: La cantidad de vida que tiene cada uno de los player
+;rec: Conjunto de player.
+;nota: Siempre serán 3, parten en las primeras 3 coordenadas.
+(define (generatePlayer life)
+  (if (intPositive? life)
+      (list (createPlayer 1 2 -90 life)
+            (createPlayer 2 2 -90 life)
+            (createPlayer 3 2 -90 life)
+            )
+      null
+      )
+  )
+;players?: parámetros (conjuntoPlayer)
+;desc: Función de pertenencia del conjunto de player.
+;dom: conjunto de player
+;rec: booleano
+(define (players? P)
+  (if (and
+       (list? P)
+       (<= (length P) 3)
+       (or (null? (get P 0)) (player? (get P 0)))
+       (or (null? (get P 1)) (player? (get P 1)))
+       (or (null? (get P 2)) (player? (get P 2)))
+       )
+      #t
+      #f
+      )
+  )
+;getPlayers: parámetros (conjuntoPlayer N)
+;desc: Funcion selectora del conjunto de player. Nos permite obtener el player N° algo.
+;dom: conjuntoPlayer X entero
+;N: Número de player que queremos conseguir (0 1 o 2)
+;rec: player
+(define (getPlayers P N)
+  (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       )
+      (get P N)
+      null
+      )
+  )
+;Modificadora de players:
+;setPlayersX: parámetros (conjuntoPlayer N X)
+;desc: Función modificadora del conjunto de player. Modifica la coordenada en X de uno de ellos.
+;dom: conjuntoPlayer X entero X entero
+;N: número de player que queremos modificar
+;X: Nueva coordenada en X
+;rec: conjuntoPlayer
+(define (setPlayersX P N X)
+  (define (setPlayersXX P N X ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (intPositive? X)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer X (getPlayerY (getPlayers P ite)) (getPlayerAngle (getPlayers P ite)) (getPlayerLife(getPlayers P ite)))
+                       (setPlayersXX P N X (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersXX P N X (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersXX P N X 0)
+  )
+       
+(define (setPlayersY P N Y)
+  (define (setPlayersYX P N Y ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (intPositive? Y)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) Y (getPlayerAngle (getPlayers P ite)) (getPlayerLife(getPlayers P ite)))
+                       (setPlayersYX P N Y (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersYX P N Y (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersYX P N Y 0)
+  )
+
+(define (setPlayersAngle P N angle)
+  (define (setPlayersAngleX P N angle ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (number? angle)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) (getPlayerY (getPlayers P ite)) angle (getPlayerLife(getPlayers P ite)))
+                       (setPlayersAngleX P N angle (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersAngleX P N angle (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersAngleX P N angle 0)
+  )
+
+(define (setPlayersLife P N life)
+  (define (setPlayersLifeX P N life ite)
+    (if (and
+       (players? P)
+       (< N 3)
+       (>= N 0)
+       (intPositive? life)
+       )
+        (cond
+        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) (getPlayerY (getPlayers P ite)) (getPlayerAngle (getPlayers P ite)) life)
+                       (setPlayersLifeX P N life (+ ite 1))
+                       )]
+        [(= ite (length P)) null
+                       ]
+        [else (cons (getPlayers P ite) (setPlayersLifeX P N life (+ ite 1)))]
+      )
+        null
+        )
+    )
+  (setPlayersLifeX P N life 0)
+  )
+
+;otras funciones players
+;deletePlayer: parámetro (conjuntoPlayer N)
+;desc: Borra un player indicado del conjunto de players.
+;dom: conjuntoPlayers X Entero
+;N: Número del player que queremos borrar dentro del conjunto
+;Encapsulación:
+;ite: Iterador de la recursión
+;rec: conjuntoPlayers
+(define (deletePlayer P N)
+  (define (deletePlayerX P N ite)
+    (if (and
+         (players? P)
+         (< N 3)
+         (>= N 0)
+         )
+        (cond
+          [(= ite N) (deletePlayer P N (+ ite 1))]
+          [(= ite (length P)) null]
+          [else (cons (getPlayers P ite) (deletePlayer P N (+ ite 1)))]
+          )
+        null
+        )
+    )
+  (deletePlayerX P N 0)
+  )
+    
+    
+;createScene: parámetros (M N E D seed)
+;desc: Función constructora de scene.
+;Dom: entero X entero X entero X entero X num
 ;N y M indican el tamaño del escenario.
 ;E la cantidad de enemigos.
 ;D indica la la dificultad.
 ;seed indica la semilla de la escena.
+;Rec: scene.
+;tipo de recursión: Natural.
+(define (createScene M N E D seed)
+    (if (and
+         (intPositive? M)
+         (intPositive? N)
+         (intPositive? E)
+         (and (intPositive? D) (< D 3) (> D 0))
+         (intPositive? seed)
+         (> M (+ 3 E))
+         )
+        (if (= D 1) ;Dificultad 1 (players con 2 de vida)
+            (list "PLAYING" M N E D seed (createEarth M N seed)
+                  (generatePlayer 2)
+                  (generateEnemy (createEarth M N seed) E seed null)
+                  )
+            ;Dificultad 2 (players con 1 de vida)
+            (list "PLAYING" M N E D seed (createEarth M N seed)
+                  (generatePlayer 1)
+                  (generateEnemy (createEarth M N seed) E seed null)
+                  )
+            )
+        null
+        )
+  )
+;checkScene: parámetros (algo)
+;desc: Función de pertenencia de scene.
+;dom: algo
+;rec: booleano
+;Encapsulación:
+;ite1: Entero que nos hace iterar la lista de scene
+;ite2: Entero que nos hace iterar las listas dentro de scene
+;repeated: Lista que nos guarda cuáles posiciones han recorrido los player y enemigos,
+;aparte de revisar si están en el suelo o no.
+(define (checkScene S)
+  (define (checkSceneX S ite1 ite2 repeated) ;ite1 para scene, ite2 para listas dentro de scene.
+    (if (and
+         (not (null? S))
+         (list? S)
+         (> (length S) 7)
+         (string? (get S 0))
+         (intPositive? (get S 1))
+         (intPositive? (get S 2))
+         (intPositive? (get S 3))
+         (intPositive? (get S 4))
+         (intPositive? (get S 5))
+         )
+        (cond
+        [(= ite1 -1) (checkSceneX S (- (length S) 1) (- (length (get S (- (length S) 1))) 1) repeated)]
+        [(= ite1 6) (if (<= ite2 0) ;revisamos floor
+                        (floor? (get (get S 6) 0))
+                        (and (checkSceneX S ite1 (- ite2 1) repeated) (floor? (get (get S ite1) ite2)))
+                        )]
+        [(= ite1 7) (if (<= ite2 0) ;revisamos player
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
+                                          (myAppend repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))))
+                             (and (player? (get (get S ite1) 0))
+                                  (find (get S 6) (list (getPlayerX (get (get S ite1) 0)) (- (getPlayerY (get (get S ite1) 0)) 1)));Player está en suelo
+                                  (not (find repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))));Player no tiene posicion repetida
+                                  ))
+                        (and (checkSceneX S ite1 (- ite2 1)
+                                          (myAppend repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))));Agrego posicion
+                             (and
+                             (player? (get (get S ite1) ite2))
+                             (find (get S 6) (list (getPlayerX (get (get S ite1) ite2)) (- (getPlayerY (get (get S ite1) ite2)) 1)))
+                             (not (find repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))))
+                             )
+                             )
+                        )]
+        [(= ite1 8) (if (<= ite2 0) ;revisamos enemy
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
+                                          (myAppend repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
+                             (and
+                             (enemy? (get (get S ite1) 0))
+                             (find (get S 6) (list (getEnemyX (get (get S ite1) 0)) (- (getEnemyY (get (get S ite1) 0)) 1)))
+                             (not (find repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
+                             )
+                             )
+                        (and (checkSceneX S ite1 (- ite2 1)
+                                          (myAppend repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
+                             (and
+                              (enemy? (get (get S ite1) ite2))
+                              (find (get S 6) (list (getEnemyX (get (get S ite1) ite2)) (- (getEnemyY (get (get S ite1) ite2)) 1)))
+                              (not (find repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
+                              )
+                             )
+                        )]
+        [(= ite1 9) (if (bullet? (get S ite1));Revisamos si hay bala
+                        (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1) repeated)
+                        #f
+                        )]
+        [else #f])
+        #f
+        )
+    )
+  (checkSceneX S -1 0 null)
+  )
+;Selectoras de Scene:
+;getSceneStatus: parámetros (scene)
+;desc: Nos entrega el estado de una escena. ("PLAYING","WIN","LOSE" o "DRAW")
+;dom: Scene
+;rec: Estado de scene. (string)
+(define (getSceneStatus scene)
+  (if (checkScene scene)
+      (get scene 0)
+      "null"
+      )
+  )
+;getSceneM: parámetros (scene)
+;desc: Nos entrega la cantidad de suelo que tiene un scene.
+;dom: Scene
+;rec: Cantidad de suelo que tiene. (entero)
+(define (getSceneM scene)
+  (if (checkScene scene)
+      (get scene 1)
+      -1
+      )
+  )
+
+;getSceneN: parámetros (scene)
+;desc: Nos entrega la cantidad de altura que tiene un scene.
+;dom: Scene
+;rec: Cantidad de altura que tiene. (entero)
+(define (getSceneN scene)
+  (if (checkScene scene)
+      (get scene 2)
+      -1
+      )
+  )
+;getSceneE: parámetros (scene)
+;desc: Nos entrega la cantidad de enemigos que tiene un scene.
+;dom: Scene
+;rec: Cantidad de enemigos que tiene. (entero)
+(define (getSceneE scene)
+  (if (checkScene scene)
+      (get scene 3)
+      -1
+      )
+  )
+;getSceneD: parámetros (scene)
+;desc: Nos entrega la dificultad de una scene.
+;dom: Scene
+;rec: Dificultad de la scene. (1 o 2)
+(define (getSceneD scene)
+  (if (checkScene scene)
+      (get scene 4)
+      -1
+      )
+  )
+;getSceneSeed: parámetros (scene)
+;desc: Nos entrega la seed de una scene
+;dom: Scene
+;rec: seed de la scene (entero)
+(define (getSceneSeed scene)
+  (if (checkScene scene)
+      (get scene 5)
+      -1
+      )
+  )
+;getSceneEarth: parámetros (scene)
+;desc: Nos entrega el conjunto de suelo de una scene.
+;dom: Scene
+;rec: Earth (lista de floor)
+(define (getSceneEarth scene)
+  (if (checkScene scene)
+      (get scene 6)
+      null
+      )
+  )
+;getScenePlayers: parámetros (scene)
+;desc: Nos entrega el conjunto de enemigos de una scene.
+;dom: scene
+;rec: enemies
+(define (getScenePlayers scene)
+  (if (checkScene scene)
+      (get scene 7)
+      null
+      )
+  )
+;getSceneEnemies: parámetros (scene)
+;desc: Nos entrega el conjunto de enemigos de una scene.
+;dom: scene
+;rec: enemies
+(define (getSceneEnemies scene)
+  (if (checkScene scene)
+      (get scene 8)
+      null
+      )
+  )
+;getSceneBullet: parámetros (scene)
+;desc: Nos entrega la bullet (si es que hay) de una scene, si no la hay nos entrega null de todos modos.
+;dom: scene
+;rec: bullet (si la hay)
+(define (getSceneBullet scene)
+  (if (checkScene scene)
+      (get scene 9);Tal como está hecha la función get, nos entregaría null de todos modos.
+      null
+      )
+  )
+  
+
+
+
+                    
+                             
+  
+
+
+
+                
+        

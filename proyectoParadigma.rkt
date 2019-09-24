@@ -103,14 +103,15 @@
 ;dom: cualquier tipo de dato
 ;rec: Booleano.
 (define (floor? F)
-  (if (list? F)
-      (if (and
-               (intPositive? (get F 0))
-               (intPositive? (get F 1))
-               )
-          #t
-          #f)
-      #f))
+  (if (and
+       (list? F)
+       (intPositive? (get F 0))
+       (intPositive? (get F 1))
+       )
+      #t
+      #f
+      )
+  )
 
 
 ;earth?: parámetros(algo)
@@ -143,15 +144,16 @@
 ;dom: Cualquier dato
 ;rec: booleano
 (define (player? P)
-  (if (list? P)
-      (if (and (equal? (car P) "P")
-               (intPositive? (get P 1))
-               (intPositive? (get P 2))
-               (number? (get P 3))
-               (intPositive? (get P 4))
-               )
-          #t
-          #f)
+  (if (and
+       (list? P)
+       (= (length P) 5)
+       (equal? (car P) "P")
+       (intPositive? (get P 1))
+       (intPositive? (get P 2))
+       (number? (get P 3))
+       (intPositive? (get P 4))
+       )
+      #t
       #f)
   )
 
@@ -278,6 +280,7 @@
 (define (enemy? E)
   (if (and
        (list? E)
+       (= (length E) 5) 
        (equal? (car E) "E")
        (player? (cons "P" (cdr E)))
        )
@@ -404,16 +407,14 @@
 ;dom: algo
 ;rec: booleano
 (define (bullet? B)
-  (if (list? B)
-      (if (and
-           (equal? "B" (car B))
-           (intPositive? (get B 1))
-           (intPositive? (get B 2))
-           (number? (get B 3))
-          )
-          #t
-          #f
-          )
+  (if (and
+      (list? B)
+      (equal? "B" (car B))
+      (intPositive? (get B 1))
+      (intPositive? (get B 2))
+      (number? (get B 3))
+      )
+      #t
       #f
       )
   )
@@ -583,7 +584,9 @@
 ;earth: Conjunto de floor
 ;E: Cantidad inicial de enemigos
 ;seed: semilla
+;repeated: Lista que guarda las posiciones enemigas (para que no se repitan)
 ;rec: lista de enemigos (E (enemy1) (enemy2) ... )
+
 (define (generateEnemy earth E seed repeated)
   (if (and
        (earth? earth)
@@ -616,7 +619,119 @@
       )
   )
  
+;enemies?: parámetros (algo)
+;desc: Crea un conjunto de enemigos inicial
+;dom: algo
+;Encapsulación:
+;ite: iterador de la recursión
+;rec: booleano
+(define (enemies? E)
+  (define (enemies?X E ite)
+    (if (list? E)
+        (cond
+          [(null? E) #t]
+          [(= ite -1) (enemies?X E (- (length E) 1))]
+          [(= ite 0) (enemy? (get E ite))]
+          [else (and (enemy? (get E ite)) (enemies?X E (- ite 1)))]
+          )
+        #f
+        )
+    )
+  (enemies?X E -1)
+  )
+;getEnemies: parámetros (conjuntoEnemy N)
+;desc: Función selectora del conjunto de enemy. Nos permite obtener el enemy N°
+;dom: conjuntoEnemy X entero
+;N: Número de enemy que queremos conseguir
+;rec: enemy seleccionado
+(define (getEnemies E N)
+  (if (and
+       (enemy? E)
+       (intPositive? N)
+       )
+      (get E N)
+      null
+      )
+  )
 
+;setEnemiesX : parámetros (conjuntoEnemy N X)
+;desc: Función modificadora del conjunto de enemy. Modifica el X de un enemy especifico.
+;dom: conjuntoEnemy X entero X entero
+;N: Número de enemy que queremos modificar
+;X: Valor a modificar
+;rec: conjuntoEnemy
+(define (setEnemiesX E N X)
+  (define (setEnemiesXX E N X ite)
+    (if (and
+         (enemies? E)
+         (intPositive? N)
+         (intPositive? X)
+         )
+        (cond
+          [(= ite N) (cons (setEnemyX (get E ite) X) (setEnemiesXX E N X (+ ite 1)))]
+          [(= ite (length E)) null]
+          [else (cons (get E ite) (setEnemiesXX E N X (+ ite 1)))]
+       )
+        null
+        )
+    )
+  (setEnemiesXX E N X 0)
+  )
+
+(define (setEnemiesY E N Y)
+  (define (setEnemiesYX E N Y ite)
+    (if (and
+         (enemies? E)
+         (intPositive? N)
+         (intPositive? Y)
+         )
+        (cond
+          [(= ite N) (cons (setEnemyY (get E ite) Y) (setEnemiesYX E N Y (+ ite 1)))]
+          [(= ite (length E)) null]
+          [else (cons (get E ite) (setEnemiesYX E N Y (+ ite 1)))]
+       )
+        null
+        )
+    )
+  (setEnemiesYX E N Y 0)
+  )
+
+(define (setEnemiesAngle E N angle)
+  (define (setEnemiesAngleX E N angle ite)
+    (if (and
+         (enemies? E)
+         (intPositive? N)
+         (number? angle)
+         )
+        (cond
+          [(= ite N) (cons (setEnemyAngle (get E ite) angle) (setEnemiesAngleX E N angle (+ ite 1)))]
+          [(= ite (length E)) null]
+          [else (cons (get E ite) (setEnemiesAngleX E N angle (+ ite 1)))]
+       )
+        null
+        )
+    )
+  (setEnemiesAngleX E N angle 0)
+  )
+
+(define (setEnemiesLife E N life)
+  (define (setEnemiesLifeX E N life ite)
+    (if (and
+         (enemies? E)
+         (intPositive? N)
+         (intPositive? life)
+         )
+        (cond
+          [(= ite N) (cons (setEnemyLife (get E ite) life) (setEnemiesLifeX E N life(+ ite 1)))]
+          [(= ite (length E)) null]
+          [else (cons (get E ite) (setEnemiesLifeX E N life (+ ite 1)))]
+       )
+        null
+        )
+    )
+  (setEnemiesLifeX E N life 0)
+  )
+       
 ;generatePlayer: parámetros (life)
 ;desc: Función que genera un conjunto de player.
 ;dom: entero
@@ -679,7 +794,7 @@
        (intPositive? X)
        )
         (cond
-        [(= ite N) (cons (createPlayer X (getPlayerY (getPlayers P ite)) (getPlayerAngle (getPlayers P ite)) (getPlayerLife(getPlayers P ite)))
+        [(= ite N) (cons (setPlayerX (getPlayers P ite) X)
                        (setPlayersXX P N X (+ ite 1))
                        )]
         [(= ite (length P)) null
@@ -701,7 +816,7 @@
        (intPositive? Y)
        )
         (cond
-        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) Y (getPlayerAngle (getPlayers P ite)) (getPlayerLife(getPlayers P ite)))
+        [(= ite N) (cons (setPlayerY (getPlayers P ite) Y)
                        (setPlayersYX P N Y (+ ite 1))
                        )]
         [(= ite (length P)) null
@@ -723,7 +838,7 @@
        (number? angle)
        )
         (cond
-        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) (getPlayerY (getPlayers P ite)) angle (getPlayerLife(getPlayers P ite)))
+        [(= ite N) (cons (setPlayerAngle (getPlayers P ite) angle)
                        (setPlayersAngleX P N angle (+ ite 1))
                        )]
         [(= ite (length P)) null
@@ -745,7 +860,7 @@
        (intPositive? life)
        )
         (cond
-        [(= ite N) (cons (createPlayer (getPlayerX (getPlayers P ite)) (getPlayerY (getPlayers P ite)) (getPlayerAngle (getPlayers P ite)) life)
+        [(= ite N) (cons (setPlayerLife (getPlayers P ite) life)
                        (setPlayersLifeX P N life (+ ite 1))
                        )]
         [(= ite (length P)) null
