@@ -214,7 +214,13 @@
     )
   (setPlayersXX P N X 0)
   )
-       
+
+;setPlayersY: parámetros (conjuntoPlayer N Y)
+;desc: Función modificadora del conjunto de player. Modifica la coordenada en Y de uno de ellos.
+;dom: conjuntoPlayer X entero X entero
+;N: número de player que queremos modificar
+;X: Nueva coordenada en Y
+;rec: conjuntoPlayer
 (define (setPlayersY P N Y)
   (define (setPlayersYX P N Y ite)
     (if (and
@@ -237,6 +243,12 @@
   (setPlayersYX P N Y 0)
   )
 
+;setPlayersAngle: parámetros (conjuntoPlayer N angle)
+;desc: Función modificadora del conjunto de player. Modifica el ángulo de un player especifico.
+;dom: conjuntoPlayer X entero X entero
+;N: número de player que queremos modificar
+;X: Nuevo ángulo
+;rec: conjuntoPlayer
 (define (setPlayersAngle P N angle)
   (define (setPlayersAngleX P N angle ite)
     (if (and
@@ -259,6 +271,12 @@
   (setPlayersAngleX P N angle 0)
   )
 
+;setPlayersLife: parámetros (conjuntoPlayer N life)
+;desc: Función modificadora del conjunto de player. Modifica la vida de un player específico.
+;dom: conjuntoPlayer X entero X entero
+;N: número de player que queremos modificar
+;life: Nueva vida
+;rec: conjuntoPlayer
 (define (setPlayersLife P N life)
   (define (setPlayersLifeX P N life ite)
     (if (and
@@ -297,15 +315,37 @@
          (>= N 0)
          )
         (cond
-          [(= ite N) (deletePlayer P N (+ ite 1))]
+          [(= ite N) (deletePlayerX P N (+ ite 1))]
           [(= ite (length P)) null]
-          [else (cons (getPlayers P ite) (deletePlayer P N (+ ite 1)))]
+          [else (cons (getPlayers P ite) (deletePlayerX P N (+ ite 1)))]
           )
         null
         )
     )
   (deletePlayerX P N 0)
   )
-
+;getPlayerXY: parámetros (player)
+;desc: Nos devuelve la coordenada X e Y en forma de lista. Nos sirve para hacer comparaciones en la función play.
+;dom: player
+;rec: lista de coordenada X e Y
+(define (getPlayerXY P)
+  (if (player? P)
+      (list (getPlayerX P) (getPlayerY P))
+      null
+      )
+  )
+(define (listPlayerXY players)
+  (define (listPlayerXYX players ite)
+    (if (not (null? players))
+        (cond
+      [(= ite -1) (listPlayerXYX players (- (length players) 1))]
+      [(= ite 0) (cons (getPlayerXY (getPlayers players 0)) null)]
+      [else (cons (getPlayerXY (getPlayers players ite)) (listPlayerXYX players (- ite 1)))]
+      )
+    null
+    )
+    )
+  (listPlayerXYX players -1)
+    )
 ;Para llamar en otros archivos
 (provide (all-defined-out))

@@ -110,5 +110,57 @@
       )
   )
 
+;Otras funciones:
+;paraMove: parámetros (bullet)
+;desc: Función que mueve a bullet en base a su ángulo. Imita dentro
+;de lo posible a un movimiento parabólico
+;dom: bullet
+;rec: bullet
+(define (paraMove B)
+  (if (bullet? B)
+      (let ([ang (getBulletAngle B)])
+        (cond
+          [(and (<= ang 90)
+               (> ang 80))  (setBulletY (setBulletAngle B (- ang 2)) (+ (getBulletY B) 1))]
+          [(and (<= ang 80)
+                (> ang 40)) (setBulletY (setBulletX (setBulletAngle B (- ang 5)) (+ (getBulletX B) 1)) (+ (getBulletY B) 1))]
+          [(and (<= ang 40)
+                (>= ang 0)) (setBulletX (setBulletAngle B (- ang 10)) (+ (getBulletX B) 1))]
+          [(and (<= ang 359)
+                (> ang 310)) (setBulletX (setBulletY (setBulletAngle B (- ang 10)) (- (getBulletY B) 1)) (+ (getBulletX B) 1))]
+          [(and (<= ang 310)
+                (> ang 270)) (setBulletY (setBulletAngle B (- ang 5)) (- (getBulletY B) 1))]
+          [(and (<= ang 270)
+                (> ang 260)) (setBulletY (setBulletAngle B (- ang 1)) (- (getBulletY B) 1))]
+          [(and (<= ang 260)
+               (> ang 210)) (setBulletX (setBulletY (setBulletAngle B (+ ang 5)) (- (getBulletY B) 1)) (- (getBulletX B) 1))]
+          [(and (<= ang 210)
+                (> ang 180)) (setBulletX (setBulletAngle B (+ ang 10)) (- (getBulletX B) 1))]
+          [(and (<= ang 180)
+                (> ang 100)) (setBulletX (setBulletY (setBulletAngle B (+ ang 10)) (+ (getBulletY B) 1)) (- (getBulletX B) 1))]
+          [(and (<= ang 100)
+               (> ang 90)) (setBulletY (setBulletAngle B (+ ang 10)) (+ (getBulletY B) 1))]
+          )
+        )
+      B
+      )
+  )
+                        
+
+(define bullet1 (createBullet 1 1 45))
+
+;getBulletXY: parámetros (bullet)
+;desc: Nos entrega una lista con las coordenadas X e Y de bullet. Sirve para la función play.
+;dom: bullet
+;rec: Lista de coordenadas X e Y de este bullet.
+(define (getBulletXY B)
+  (if (bullet? B)
+      (list (getBulletX B) (getBulletY B))
+      null
+      )
+  )
+      
+        
+
 ;Para llamar en otros archivos
 (provide (all-defined-out))

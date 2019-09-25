@@ -200,7 +200,7 @@
 ;rec: enemy seleccionado
 (define (getEnemies E N)
   (if (and
-       (enemy? E)
+       (enemies? E)
        (intPositive? N)
        )
       (get E N)
@@ -231,6 +231,12 @@
     )
   (setEnemiesXX E N X 0)
   )
+;setEnemiesY : parámetros (conjuntoEnemy N Y)
+;desc: Función modificadora del conjunto de enemy. Modifica el Y de un enemy especifico.
+;dom: conjuntoEnemy X entero X entero
+;N: Número de enemy que queremos modificar
+;Y: Valor a modificar
+;rec: conjuntoEnemy
 
 (define (setEnemiesY E N Y)
   (define (setEnemiesYX E N Y ite)
@@ -249,7 +255,12 @@
     )
   (setEnemiesYX E N Y 0)
   )
-
+;setEnemiesAngle : parámetros (conjuntoEnemy N angle)
+;desc: Función modificadora del conjunto de enemy. Modifica el ángulo de un enemigo especifico.
+;dom: conjuntoEnemy X entero X entero
+;N: Número de enemy que queremos modificar
+;angle: Valor a modificar
+;rec: conjuntoEnemy
 (define (setEnemiesAngle E N angle)
   (define (setEnemiesAngleX E N angle ite)
     (if (and
@@ -267,7 +278,12 @@
     )
   (setEnemiesAngleX E N angle 0)
   )
-
+;setEnemiesLife : parámetros (conjuntoEnemy N life)
+;desc: Función modificadora del conjunto de enemy. Modifica la vida de un enemigo especifico.
+;dom: conjuntoEnemy X entero X entero
+;N: Número de enemy que queremos modificar
+;life: Valor a modificar
+;rec: conjuntoEnemy
 (define (setEnemiesLife E N life)
   (define (setEnemiesLifeX E N life ite)
     (if (and
@@ -285,6 +301,61 @@
     )
   (setEnemiesLifeX E N life 0)
   )
+
+;otras funciones enemies
+;deleteEnemy: parámetro (conjuntoEnemy N)
+;desc: Borra un enemy indicado del conjunto de enemies.
+;dom: conjuntoEnemy X entero
+;N: Número del enemy que queremos borrar dentro del conjunto
+;Encapsulación:
+;ite: Iterador de la recursión
+;rec: conjuntoEnemy
+(define (deleteEnemy E N)
+  (define (deleteEnemyX E N ite)
+    (if (and
+         (enemies? E)
+         (< N 3)
+         (>= N 0)
+         )
+        (cond
+          [(= ite N) (deleteEnemyX E N (+ ite 1))]
+          [(= ite (length E)) null]
+          [else (cons (getEnemies E ite) (deleteEnemyX E N (+ ite 1)))]
+          )
+        null
+        )
+    )
+  (deleteEnemyX E N 0)
+  )
+
+;getEnemyXY: parámetro (enemy)
+;desc: Nos da una lista de las coordenadas X e Y de enemy. Nos sirve para comparar en la función play.
+;dom: enemy
+;rec: lista de coordenada X e Y
+(define (getEnemyXY E)
+  (if (enemy? E)
+      (list (getEnemyX E) (getEnemyY E))
+      null
+      )
+  )
+
+;listEnemyXY: parámetro (enemy)
+;desc: Nos da una lista de listas de coordenadas XY de un conjuntoEnemy.
+;dom:conjuntoEnemy
+;rec: Lista de listas
+(define (listEnemyXY enemies)
+  (define (listEnemyXYX enemies ite)
+    (if (not (null? enemies))
+        (cond
+      [(= ite -1) (listEnemyXYX enemies (- (length enemies) 1))]
+      [(= ite 0) (cons (getEnemyXY (getEnemies enemies 0)) null)]
+      [else (cons (getEnemyXY (getEnemies enemies ite)) (listEnemyXYX enemies (- ite 1)))]
+      )
+    null
+    )
+    )
+  (listEnemyXYX enemies -1)
+    )
 
 ;Para llamar en otros archivos
 (provide (all-defined-out))

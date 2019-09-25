@@ -15,6 +15,8 @@
 ;seed indica la semilla de la escena.
 ;Rec: scene.
 ;tipo de recursión: Natural.
+
+;Representación: (<estado> <cantSuelo> <cantAltura> <cantEnemigosVivos> <cantPlayersVivos> <dificultad> <semilla> <earth> <conjuntoEnemy> <conjuntoPlayer>)
 (define (createScene M N E D seed)
     (if (and
          (intPositive? M)
@@ -25,12 +27,12 @@
          (> M (+ 3 E))
          )
         (if (= D 1) ;Dificultad 1 (players con 2 de vida)
-            (list "PLAYING" M N E D seed (createEarth M N seed)
+            (list "PLAYING" M N E 3 D seed (createEarth M N seed)
                   (generatePlayer 2)
                   (generateEnemy (createEarth M N seed) E seed null)
                   )
             ;Dificultad 2 (players con 1 de vida)
-            (list "PLAYING" M N E D seed (createEarth M N seed)
+            (list "PLAYING" M N E 3 D seed (createEarth M N seed)
                   (generatePlayer 1)
                   (generateEnemy (createEarth M N seed) E seed null)
                   )
@@ -59,35 +61,36 @@
          (intPositive? (get S 3))
          (intPositive? (get S 4))
          (intPositive? (get S 5))
+         (intPositive? (get S 6))
          )
         (cond
         [(= ite1 -1) (checkSceneX S (- (length S) 1) (- (length (get S (- (length S) 1))) 1) repeated)]
-        [(= ite1 6) (if (<= ite2 0) ;revisamos floor
-                        (floor? (get (get S 6) 0))
+        [(= ite1 7) (if (<= ite2 0) ;revisamos floor
+                        (floor? (get (get S 7) 0))
                         (and (checkSceneX S ite1 (- ite2 1) repeated) (floor? (get (get S ite1) ite2)))
                         )]
-        [(= ite1 7) (if (<= ite2 0) ;revisamos player
+        [(= ite1 8) (if (<= ite2 0) ;revisamos player
                         (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
                                           (myAppend repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))))
                              (and (player? (get (get S ite1) 0))
-                                  (find (get S 6) (list (getPlayerX (get (get S ite1) 0)) (- (getPlayerY (get (get S ite1) 0)) 1)));Player está en suelo
+                                  (find (get S 7) (list (getPlayerX (get (get S ite1) 0)) (- (getPlayerY (get (get S ite1) 0)) 1)));Player está en suelo
                                   (not (find repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))));Player no tiene posicion repetida
                                   ))
                         (and (checkSceneX S ite1 (- ite2 1)
                                           (myAppend repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))));Agrego posicion
                              (and
                              (player? (get (get S ite1) ite2))
-                             (find (get S 6) (list (getPlayerX (get (get S ite1) ite2)) (- (getPlayerY (get (get S ite1) ite2)) 1)))
+                             (find (get S 7) (list (getPlayerX (get (get S ite1) ite2)) (- (getPlayerY (get (get S ite1) ite2)) 1)))
                              (not (find repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))))
                              )
                              )
                         )]
-        [(= ite1 8) (if (<= ite2 0) ;revisamos enemy
+        [(= ite1 9) (if (<= ite2 0) ;revisamos enemy
                         (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
                                           (myAppend repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
                              (and
                              (enemy? (get (get S ite1) 0))
-                             (find (get S 6) (list (getEnemyX (get (get S ite1) 0)) (- (getEnemyY (get (get S ite1) 0)) 1)))
+                             (find (get S 7) (list (getEnemyX (get (get S ite1) 0)) (- (getEnemyY (get (get S ite1) 0)) 1)))
                              (not (find repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
                              )
                              )
@@ -95,14 +98,10 @@
                                           (myAppend repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
                              (and
                               (enemy? (get (get S ite1) ite2))
-                              (find (get S 6) (list (getEnemyX (get (get S ite1) ite2)) (- (getEnemyY (get (get S ite1) ite2)) 1)))
+                              (find (get S 7) (list (getEnemyX (get (get S ite1) ite2)) (- (getEnemyY (get (get S ite1) ite2)) 1)))
                               (not (find repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
                               )
                              )
-                        )]
-        [(= ite1 9) (if (bullet? (get S ite1));Revisamos si hay bala
-                        (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1) repeated)
-                        #f
                         )]
         [else #f])
         #f
@@ -116,20 +115,18 @@
 ;dom: Scene
 ;rec: Estado de scene. (string)
 (define (getSceneStatus scene)
-  (if (checkScene scene)
+
       (get scene 0)
-      "null"
-      )
+
   )
 ;getSceneM: parámetros (scene)
 ;desc: Nos entrega la cantidad de suelo que tiene un scene.
 ;dom: Scene
 ;rec: Cantidad de suelo que tiene. (entero)
 (define (getSceneM scene)
-  (if (checkScene scene)
+
       (get scene 1)
-      -1
-      )
+
   )
 
 ;getSceneN: parámetros (scene)
@@ -137,81 +134,68 @@
 ;dom: Scene
 ;rec: Cantidad de altura que tiene. (entero)
 (define (getSceneN scene)
-  (if (checkScene scene)
+
       (get scene 2)
-      -1
-      )
+
   )
 ;getSceneE: parámetros (scene)
 ;desc: Nos entrega la cantidad de enemigos que tiene un scene.
 ;dom: Scene
 ;rec: Cantidad de enemigos que tiene. (entero)
 (define (getSceneE scene)
-  (if (checkScene scene)
+
       (get scene 3)
-      -1
-      )
+
+  )
+;getSceneP: parámetros (scene)
+;desc: Nos entrega la cantidad de players que tiene un scene.
+;dom: Scene
+;rec: Cantidad de enemigos que tiene. (entero)
+(define (getSceneP scene)
+      (get scene 4)
   )
 ;getSceneD: parámetros (scene)
 ;desc: Nos entrega la dificultad de una scene.
 ;dom: Scene
 ;rec: Dificultad de la scene. (1 o 2)
 (define (getSceneD scene)
-  (if (checkScene scene)
-      (get scene 4)
-      -1
-      )
+
+      (get scene 5)
+
   )
 ;getSceneSeed: parámetros (scene)
 ;desc: Nos entrega la seed de una scene
 ;dom: Scene
 ;rec: seed de la scene (entero)
 (define (getSceneSeed scene)
-  (if (checkScene scene)
-      (get scene 5)
-      -1
-      )
+
+      (get scene 6)
+
   )
 ;getSceneEarth: parámetros (scene)
 ;desc: Nos entrega el conjunto de suelo de una scene.
 ;dom: Scene
 ;rec: Earth (lista de floor)
 (define (getSceneEarth scene)
-  (if (checkScene scene)
-      (get scene 6)
-      null
-      )
+      (get scene 7)
+
   )
 ;getScenePlayers: parámetros (scene)
 ;desc: Nos entrega el conjunto de enemigos de una scene.
 ;dom: scene
 ;rec: enemies
 (define (getScenePlayers scene)
-  (if (checkScene scene)
-      (get scene 7)
-      null
-      )
+      (get scene 8)
+
   )
 ;getSceneEnemies: parámetros (scene)
 ;desc: Nos entrega el conjunto de enemigos de una scene.
 ;dom: scene
 ;rec: enemies
 (define (getSceneEnemies scene)
-  (if (checkScene scene)
-      (get scene 8)
-      null
-      )
+      (get scene 9)
   )
-;getSceneBullet: parámetros (scene)
-;desc: Nos entrega la bullet (si es que hay) de una scene, si no la hay nos entrega null de todos modos.
-;dom: scene
-;rec: bullet (si la hay)
-(define (getSceneBullet scene)
-  (if (checkScene scene)
-      (get scene 9);Tal como está hecha la función get, nos entregaría null de todos modos.
-      null
-      )
-  )
+
 
 ;Modificadoras de Scene
 ;setScenePlayer: parámetros (scene N M O)
@@ -226,7 +210,6 @@
 ;O = 4: Modificamos su vida
 (define (setScenePlayer scene N M O)
   (if (and
-       (checkScene scene)
        (intPositive? N)
        (>= N 0)
        (< N 3)
@@ -235,20 +218,20 @@
        )
       (cond
         [(= O 1) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (setPlayersX (getScenePlayers scene) N M)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                        (getSceneEarth scene) (setPlayersX (getScenePlayers scene) N M);aqui va un seed
                        (getSceneEnemies scene))]
         [(= O 2) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (setPlayersY (getScenePlayers scene) N M)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                       (getSceneSeed scene) (getSceneEarth scene) (setPlayersY (getScenePlayers scene) N M)
                        (getSceneEnemies scene))]
         [(= O 3) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (setPlayersAngle (getScenePlayers scene) N M)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                       (getSceneSeed scene) (getSceneEarth scene) (setPlayersAngle (getScenePlayers scene) N M)
                        (getSceneEnemies scene))]
         [(= O 4) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (setPlayersLife (getScenePlayers scene) N M)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                       (getSceneSeed scene) (getSceneEarth scene) (setPlayersLife (getScenePlayers scene) N M)
                        (getSceneEnemies scene))]
         [else scene]
         )
@@ -269,29 +252,29 @@
 ;O = 4: Modificamos su vida
 (define (setSceneEnemy scene N M O)
   (if (and
-       (checkScene scene)
+       ;(checkScene scene)
        (intPositive? N)
        (>= N 0)
        (< N (getSceneE scene))
        (intPositive? M)
-       (intPositive? O)
+       (intPositive? O) 
        )
       (cond
         [(= O 1) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (getScenePlayers scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                       (getSceneSeed scene) (getSceneEarth scene) (getScenePlayers scene)
                        (setEnemiesX (getSceneEnemies scene) N M))]
         [(= O 2) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (getScenePlayers scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                       (getSceneSeed scene) (getSceneEarth scene) (getScenePlayers scene)
                        (setEnemiesY (getSceneEnemies scene) N M))]
         [(= O 3) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (getScenePlayers scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                       (getSceneSeed scene) (getSceneEarth scene) (getScenePlayers scene)
                        (setEnemiesAngle (getSceneEnemies scene) N M))]
         [(= O 4) (list (getSceneStatus scene) (getSceneM scene)
-                       (getSceneN scene) (getSceneE scene) (getSceneD scene)
-                       (getSceneEarth scene) (getScenePlayers scene)
+                       (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
+                       (getSceneSeed scene) (getSceneEarth scene) (getScenePlayers scene)
                        (setEnemiesLife (getSceneEnemies scene) N M))]
         [else scene]
         )
@@ -300,7 +283,49 @@
   )
       
       
+(define (deleteSceneEnemy scene N)
+  (if (and
+       (intPositive? N)
+       (>= N 0)
+       (< N (getSceneE scene))
+       )
+      (list (getSceneStatus scene)
+            (getSceneM scene)
+            (getSceneN scene)
+            (- (getSceneE scene) 1)
+            (getSceneP scene)                               
+            (getSceneD scene)
+            (getSceneSeed scene)
+            (getSceneEarth scene)
+            (getScenePlayers scene)
+            (deleteEnemy (getSceneEnemies) N)
+            )
+      scene
+      )
+  )
 
+(define (deleteScenePlayer scene N)
+  (if (and
+       (intPositive? N)
+       (>= N 0)
+       (< N (getSceneP scene))
+       )
+      (list (getSceneStatus scene)
+            (getSceneM scene)
+            (getSceneN scene)
+            (getSceneE scene)
+            (- (getSceneP scene) 1)                               
+            (getSceneD scene)
+            (getSceneSeed scene)
+            (getSceneEarth scene)
+            (deletePlayer (getScenePlayers scene) N)
+            (getSceneEnemies scene)
+            )
+      scene
+      )
+  )
+       
+                                                        
 
 
 ;Scene1:

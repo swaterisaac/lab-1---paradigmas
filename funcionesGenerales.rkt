@@ -84,5 +84,23 @@
   )
   )
 
+;findXY: parámetros (listaXY XY)
+;desc: Recibe una lista de XY y un XY, para devolvernos el número donde se encuentra posicionado-
+;dom: listaXY X XY
+;XY: (x y)
+;rec: entero , representando el valor donde se encontraba ese XY.
+(define (findXY listaXY XY)
+  (define (findXYX listaXY XY ite)
+    (if (not (null? listaXY))
+        (cond
+          [(equal? (get listaXY ite) XY) ite]
+          [(= ite (length listaXY) -1)]
+          [else (findXYX listaXY XY (+ ite 1))] 
+          )
+        -1)
+    )
+  (findXYX listaXY XY 0)
+  )
+
 ;Para llamar en otros archivos
 (provide (all-defined-out))
