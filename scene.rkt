@@ -219,7 +219,7 @@
       (cond
         [(= O 1) (list (getSceneStatus scene) (getSceneM scene)
                        (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
-                        (getSceneEarth scene) (setPlayersX (getScenePlayers scene) N M);aqui va un seed
+                        (getSceneSeed scene) (getSceneEarth scene) (setPlayersX (getScenePlayers scene) N M);aqui va un seed
                        (getSceneEnemies scene))]
         [(= O 2) (list (getSceneStatus scene) (getSceneM scene)
                        (getSceneN scene) (getSceneE scene) (getSceneP scene) (getSceneD scene)
@@ -281,6 +281,16 @@
       scene
       )
   )
+
+
+(define (setSceneStatus scene status)
+   (list status (getSceneM scene)
+         (getSceneN scene) (getSceneE scene)
+         (getSceneD scene) (getSceneP scene)
+         (getSceneSeed scene) (getSceneEarth scene)
+         (getScenePlayers scene)
+         (getSceneEnemies scene))
+  )
       
       
 (define (deleteSceneEnemy scene N)
@@ -298,7 +308,7 @@
             (getSceneSeed scene)
             (getSceneEarth scene)
             (getScenePlayers scene)
-            (deleteEnemy (getSceneEnemies) N)
+            (deleteEnemy (getSceneEnemies scene) N)
             )
       scene
       )
