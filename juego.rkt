@@ -190,6 +190,11 @@
                       "   PL:" (number->string (getSceneP scene))
                       "\n\n\n" (scene->string scene))
        ]
+
+      
+      )
+    )
+  )
   
                         
 (define A (deletePlayer (deletePlayer (generatePlayer 1) 1)0))
