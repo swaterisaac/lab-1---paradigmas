@@ -340,6 +340,9 @@
 
 ;Scene1:
 (define S1 (createScene 100 20 3 1 123))
+;Scene2:
+(define S2 (createScene 50 10 6 1 124123))
+
 ;Para llamar en otros archivos
 (provide (all-defined-out))
 

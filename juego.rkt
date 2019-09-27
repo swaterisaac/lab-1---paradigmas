@@ -181,21 +181,55 @@
                )
   )
 
+(define (sceneFile scene file)
+  (define (sceneFileX scene file ite)
+    (cond
+      [(= ite (getSceneM scene))
+       (cond
+         [(find (getSceneEarth scene) (list ite file))
+          "$"]
+         [(find (listEnemyXY(getSceneEnemies scene)) (list ite file))
+          "E"]
+         [(find (listPlayerXY (getScenePlayers scene)) (list ite file))
+          "P"]
+         [else "-"]
+          )]
+      [else
+       (cond
+         [(find (getSceneEarth scene) (list ite file))
+          (string-append "$" (sceneFileX scene file (+ ite 1)))]
+         [(find (listEnemyXY(getSceneEnemies scene)) (list ite file))
+          (string-append "E" (sceneFileX scene file (+ ite 1)))]
+         [(find (listPlayerXY (getScenePlayers scene)) (list ite file))
+          (string-append "P" (sceneFileX scene file (+ ite 1)))]
+         [else
+          (string-append "-" (sceneFileX scene file (+ ite 1)))
+          ]
+         )
+       ]
+      )
+    )
+  (sceneFileX scene file 1)
+  )
+
+
 (define (scene->string scene)
   (define (convX scene ite)
     (cond
-      [(= ite 0)
+      [(= ite -1)
        (string-append (getSceneStatus scene) "  ENE:"
                       (number->string (getSceneE scene))
                       "   PL:" (number->string (getSceneP scene))
-                      "\n\n\n" (scene->string scene))
+                      "\n\n\n" (convX scene (getSceneN scene)))
        ]
-
-      
+      [(= ite 1) (sceneFile scene 1)]
+      [else (string-append (sceneFile scene ite) "\n" (convX scene (- ite 1)) )]
       )
     )
+  (convX scene -1)
   )
-  
+      
+
                         
 (define A (deletePlayer (deletePlayer (generatePlayer 1) 1)0))
 (define B (createEarth 10 10 0))
