@@ -126,8 +126,15 @@
         (and (find earth (list (get (get lista ite) 0) (- (get (get lista ite) 1) 1))) (isInEarth?X earth lista (+ ite 1)))
         )
     )
-  (isInEarth?X earth lista 0)
+  (if (and
+       (not (null? lista))
+            (list? lista)
+            )
+      (isInEarth?X earth lista 0)
+      #f
+      )
   )
+ 
 
 ;Para llamar en otros archivos
 (provide (all-defined-out))

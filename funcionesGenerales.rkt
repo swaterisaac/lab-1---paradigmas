@@ -117,9 +117,16 @@
 ;desc: Recibe una lista y si algún elemento se repite dentro, nos entrega un true. Si no, un false.
 ;dom: lista
 ;rec: booleano
-#|(define (repeat? lista)
-  (define (repeat?X lista ite)
-|#
+(define (repeat? lista)
+  (if (null? lista)
+      #f
+      (if (find (cdr lista)(car lista))
+          #t
+          (repeat? (cdr lista))
+          )
+      )
+  )
+  
 
     
 

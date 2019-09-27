@@ -348,17 +348,19 @@
 ;rec: Lista de listas
 (define (listEnemyXY enemies)
   (define (listEnemyXYX enemies ite)
-    (if (not (null? enemies))
-        (cond
-      [(= ite -1) (listEnemyXYX enemies (- (length enemies) 1))]
-      [(= ite 0) (cons (getEnemyXY (getEnemies enemies 0)) null)]
-      [else (cons (getEnemyXY (getEnemies enemies ite)) (listEnemyXYX enemies (- ite 1)))]
+    (cond
+      [(= ite (- (length enemies) 1)) (cons (getEnemyXY (getEnemies enemies ite)) null)]
+      [else (cons (getEnemyXY (getEnemies enemies ite)) (listEnemyXYX enemies (+ ite 1)))]
       )
-    null
     )
-    )
-  (listEnemyXYX enemies -1)
-    )
+  (if (not (null? enemies))
+      (listEnemyXYX enemies 0)
+      null
+      )
+  )
+
+  
+    
 
 ;Para llamar en otros archivos
 (provide (all-defined-out))

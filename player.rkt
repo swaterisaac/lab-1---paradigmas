@@ -348,16 +348,13 @@
   )
 (define (listPlayerXY players)
   (define (listPlayerXYX players ite)
-    (if (not (null? players))
-        (cond
-      [(= ite -1) (listPlayerXYX players (- (length players) 1))]
-      [(= ite 0) (cons (getPlayerXY (getPlayers players 0)) null)]
-      [else (cons (getPlayerXY (getPlayers players ite)) (listPlayerXYX players (- ite 1)))]
+    (cond
+      [(= ite (- (length players) 1)) (cons (getPlayerXY (getPlayers players ite)) null)]
+      [else (cons (getPlayerXY (getPlayers players ite)) (listPlayerXYX players (+ ite 1)))]
       )
-    null
     )
-    )
-  (listPlayerXYX players -1)
-    )
+  (listPlayerXYX players 0)
+  )
+
 ;Para llamar en otros archivos
 (provide (all-defined-out))

@@ -135,8 +135,8 @@
           [(and (<= ang 260)
                (> ang 210)) (setBulletX (setBulletY (setBulletAngle B (+ ang 5)) (- (getBulletY B) 1)) (- (getBulletX B) 1))]
           [(and (<= ang 210)
-                (> ang 180)) (setBulletX (setBulletAngle B (+ ang 10)) (- (getBulletX B) 1))]
-          [(and (<= ang 180)
+                (> ang 150)) (setBulletX (setBulletAngle B (+ ang 10)) (- (getBulletX B) 1))]
+          [(and (<= ang 150)
                 (> ang 100)) (setBulletX (setBulletY (setBulletAngle B (+ ang 10)) (+ (getBulletY B) 1)) (- (getBulletX B) 1))]
           [(and (<= ang 100)
                (> ang 90)) (setBulletY (setBulletAngle B (+ ang 10)) (+ (getBulletY B) 1))]

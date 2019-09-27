@@ -50,6 +50,33 @@
 ;repeated: Lista que nos guarda cuáles posiciones han recorrido los player y enemigos,
 ;aparte de revisar si están en el suelo o no.
 (define (checkScene S)
+            
+  (if (and
+       (not (null? S))
+       (list? S)
+       (> (length S) 7)
+       (string? (get S 0))
+       (intPositive? (get S 1))
+       (intPositive? (get S 2))
+       (intPositive? (get S 3))
+       (intPositive? (get S 4))
+       (intPositive? (get S 5))
+       (intPositive? (get S 6))
+       (earth? (get S 7))
+       (players? (get S 8))
+       (enemies? (get S 9))
+       (isInEarth? (get S 7) (append (listPlayerXY (get S 8)) (listEnemyXY (get S 9))))
+       (not (repeat? (append (listPlayerXY (get S 8)) (listEnemyXY (get S 9)))))
+       )
+      #t
+      #f
+      )
+  )
+      
+      
+
+
+#|(define (checkScene S)
   (define (checkSceneX S ite1 ite2 repeated) ;ite1 para scene, ite2 para listas dentro de scene.
     (if (and
          (not (null? S))
@@ -108,7 +135,7 @@
         )
     )
   (checkSceneX S -1 0 null)
-  )
+  )|#
 ;Selectoras de Scene:
 ;getSceneStatus: parámetros (scene)
 ;desc: Nos entrega el estado de una escena. ("PLAYING","WIN","LOSE" o "DRAW")
