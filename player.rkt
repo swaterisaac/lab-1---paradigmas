@@ -163,9 +163,9 @@
   (if (and
        (list? P)
        (<= (length P) 3)
-       (or (null? (get P 0)) (player? (get P 0)))
-       (or (null? (get P 1)) (player? (get P 1)))
-       (or (null? (get P 2)) (player? (get P 2)))
+       (player? (get P 0))
+       (player? (get P 1))
+       (player? (get P 2))
        )
       #t
       #f

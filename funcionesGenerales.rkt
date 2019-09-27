@@ -64,7 +64,18 @@
     )
   (findX lista X -1)
   )
-        
+
+;myModulo: parámetros (X Y)
+;desc: Saca el modulo normal de dos elementos, pero si el resultado es 0,1 o 2, retorna 3.
+;Se hace esta función para el createEarth.
+;dom: entero X entero
+;rec: entero entre el 2 y el número Y-1
+(define (myModulo X Y)
+  (if (<= (modulo X Y) 2)
+      3
+      (modulo X Y)
+      )
+  )
 
 
 

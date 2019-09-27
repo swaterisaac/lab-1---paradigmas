@@ -49,8 +49,8 @@
             )
             ;Si land = 1
             (if (= seed 0)
-                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (myRandom seed) 0)))
-                (cons (createFloor M 1) (cons (createFloor M (modulo 172 N)) (createEarthX (- M 1) N (- seed 1) 1)))
+                (cons (createFloor M 1) (cons (createFloor M (myModulo 172 N)) (createEarthX (- M 1) N (myRandom seed) 0)))
+                (cons (createFloor M 1) (cons (createFloor M (myModulo 172 N)) (createEarthX (- M 1) N (- seed 1) 1)))
                 )
             )
         )

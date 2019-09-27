@@ -36,7 +36,7 @@
                              (< member (getSceneP scene))
                              (>= member 0)
                              (procedure? tf)
-                             (number? angle)))|#
+                             (number? angle)));|#
                           (if (and
                              (checkScene scene)
                              (equal? (getSceneStatus scene) "PLAYING")
@@ -70,7 +70,7 @@
                                               (playX (deleteScenePlayer newS member)
                                                      0 0 tf 2 (tf (createBullet (getEnemyX (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
                                                                                 (getEnemyY (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
-                                                                                (modulo (getSceneSeed scene) 360))))) ;Player muere si se queda en una casilla de otro player, enemy o fuera de floor.
+                                                                                130)))) ;Player muere si se queda en una casilla de otro player, enemy o fuera de floor.
                                           (playX newS 0 0 tf 1 (tf bullet))
                                           )
                                       )]
@@ -89,7 +89,7 @@
                                                     (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet)))
                                                     0 0 tf 2 (tf (createBullet (getEnemyX (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
                                                                                (getEnemyY (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
-                                                                               (modulo (getSceneSeed scene) 360))))
+                                                                               130)))
                                                    )]
                                               ;Bala en aliado
                                               [(find (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet))
@@ -100,7 +100,7 @@
                                                         (deleteScenePlayer scene (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)))
                                                         0 0 tf 2 (tf (createBullet (getEnemyX (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
                                                                                    (getEnemyY (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
-                                                                                   (modulo (getSceneSeed scene) 360))))
+                                                                                   130)))
                                                        (playX
                                                         (list (getSceneStatus scene)
                                                               (getSceneM scene)
@@ -123,7 +123,7 @@
                                                (playX
                                                 scene 0 0 tf 2 (tf (createBullet (getEnemyX (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
                                                                                                          (getEnemyY (getEnemies (getSceneEnemies scene) (- (getSceneE scene) 1)))
-                                                                                                         (modulo (getSceneSeed scene) 360)))
+                                                                                                         130))
                                                 )]
                                                
                                               ;Bala en recorrido
@@ -165,7 +165,7 @@
                                               )]
                                 
                                 )
-                              scene
+                              null
                               )
                           )
                         (playX scene member move tf 0 (createBullet (+ (getPlayerX (getPlayers (getScenePlayers
@@ -234,6 +234,6 @@
 (define A (deletePlayer (deletePlayer (generatePlayer 1) 1)0))
 (define B (createEarth 10 10 0))
 (define C (setEnemiesX (generateEnemy B 1 0 null) 0 4))
-(define D (list "PLAYING" 10 10 1 1 1 0 B A C))
-;((((((play D )0 ) -3 )paraMove )0 )0)
+(define D (list "PLAYING" 10 10 1 1 1 0 B null C))
+((((((play D )0 ) -3 )paraMove )0 )0)
          
