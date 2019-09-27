@@ -114,5 +114,20 @@
       )
   )
 
+;isInEarth?: parámetros (earth list)
+;desc: Dado un conjunto de floor y una lista de posiciones (tienen el mismo formato),
+;ve si la lista de posiciones está encima de alguna posición de earth.
+;dom: conjuntoFloor X lista
+;rec: booleano
+(define (isInEarth? earth lista)
+  (define(isInEarth?X earth lista ite)
+    (if (= ite (- (length lista) 1))
+        (find earth (list (get (get lista ite) 0) (- (get (get lista ite) 1) 1)))
+        (and (find earth (list (get (get lista ite) 0) (- (get (get lista ite) 1) 1))) (isInEarth?X earth lista (+ ite 1)))
+        )
+    )
+  (isInEarth?X earth lista 0)
+  )
+
 ;Para llamar en otros archivos
 (provide (all-defined-out))

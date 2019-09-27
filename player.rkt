@@ -160,7 +160,19 @@
 ;dom: conjunto de player
 ;rec: booleano
 (define (players? P)
-  (if (and
+  (define (players?X P ite)
+    (if (= ite (- (length P) 1))
+        (player? (get P ite))
+        (and (player? (get P ite)) (players?X P (+ ite 1)))
+        )
+    )
+  (if (null? P)
+      #t
+      (players?X P 0)
+      )
+  )
+  
+  #|(if (and
        (list? P)
        (<= (length P) 3)
        (player? (get P 0))
@@ -170,7 +182,7 @@
       #t
       #f
       )
-  )
+  )|#
 ;getPlayers: parámetros (conjuntoPlayer N)
 ;desc: Funcion selectora del conjunto de player. Nos permite obtener el player N° algo.
 ;dom: conjuntoPlayer X entero

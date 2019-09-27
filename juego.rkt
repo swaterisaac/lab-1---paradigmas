@@ -233,7 +233,7 @@
                         
 (define A (deletePlayer (deletePlayer (generatePlayer 1) 1)0))
 (define B (createEarth 10 10 0))
-(define C (setEnemiesX (generateEnemy B 1 0 null) 0 4))
+(define C (setEnemiesX (generateEnemy B 1 0) 0 4))
 (define D (list "PLAYING" 10 10 1 1 1 0 B null C))
 ((((((play D )0 ) -3 )paraMove )0 )0)
          

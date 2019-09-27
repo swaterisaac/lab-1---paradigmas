@@ -1,1 +1,1 @@
-("6.11" ("e73207bf402fcc5b169652efe0744a40448ecf08" . "d74e209169beb654d2d8ba5145348d816237ab52") #"E:\\repositorios\\lab-1---paradigmas\\funcionesGenerales.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
+("6.11" ("d6fb8fc9a238098f1f315087f367924bdc438b70" . "b18024451f4d02c5898a947563f84901c624f1fa") #"C:\\Users\\grojasa\\lab-1---paradigmas\\funcionesGenerales.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

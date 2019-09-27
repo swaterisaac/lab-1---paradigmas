@@ -141,36 +141,39 @@
 ;repeated: Lista que guarda las posiciones enemigas (para que no se repitan)
 ;rec: lista de enemigos (E (enemy1) (enemy2) ... )
 
-(define (generateEnemy earth E seed repeated)
-  (if (and
-       (earth? earth)
-       (intPositive? E)
-       (intPositive? seed)
-       )
-      (if (= E 0)
-          null
-          (if (and
-               (not (= (getEarthX earth (modulo seed (length earth))) 1))
-               (not (= (getEarthY earth (modulo seed (length earth))) 2))
-               (not (= (getEarthX earth (modulo seed (length earth))) 2));Para que no comiencen en la misma posicion de player
-               (not (= (getEarthY earth (modulo seed (length earth))) 2))
-               (not (= (getEarthX earth (modulo seed (length earth))) 3))
-               (not (= (getEarthY earth (modulo seed (length earth))) 2))
-               (not (find repeated (modulo seed (length earth))));Para que no se repita
-               )
-            (cons (createEnemy
-            (getEarthX earth (modulo seed (length earth)))
-            (+ (getEarthY earth (modulo seed (length earth))) 1)
-            0
-            1
+(define (generateEnemy earth E seed)
+  (define (generateEnemyX earth E seed repeated)
+    (if (and
+         (earth? earth)
+         (intPositive? E)
+         (intPositive? seed)
+         )
+        (if (= E 0)
+            null
+            (if (and
+                 (not (= (getEarthX earth (modulo seed (length earth))) 1))
+                 (not (= (getEarthY earth (modulo seed (length earth))) 2))
+                 (not (= (getEarthX earth (modulo seed (length earth))) 2));Para que no comiencen en la misma posicion de player
+                 (not (= (getEarthY earth (modulo seed (length earth))) 2))
+                 (not (= (getEarthX earth (modulo seed (length earth))) 3))
+                 (not (= (getEarthY earth (modulo seed (length earth))) 2))
+                 (not (find repeated (modulo seed (length earth))));Para que no se repita
+                 )
+                (cons (createEnemy
+                       (getEarthX earth (modulo seed (length earth)))
+                       (+ (getEarthY earth (modulo seed (length earth))) 1)
+                       0
+                       1
+                       )
+                      (generateEnemyX earth (- E 1) (myRandom seed) (myAppend repeated (modulo seed (length earth)))))
+                (generateEnemyX earth E (myRandom seed) repeated)
+                )
+            
             )
-            (generateEnemy earth (- E 1) (myRandom seed) (myAppend repeated (modulo seed (length earth)))))
-            (generateEnemy earth E (myRandom seed) repeated)
-            )
-          
-          )
-      null
-      )
+        null
+        )
+    )
+  (generateEnemyX earth E seed null)
   )
  
 ;enemies?: parámetros (algo)
