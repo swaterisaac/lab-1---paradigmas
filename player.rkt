@@ -171,18 +171,7 @@
       (players?X P 0)
       )
   )
-  
-  #|(if (and
-       (list? P)
-       (<= (length P) 3)
-       (player? (get P 0))
-       (player? (get P 1))
-       (player? (get P 2))
-       )
-      #t
-      #f
-      )
-  )|#
+
 ;getPlayers: parámetros (conjuntoPlayer N)
 ;desc: Funcion selectora del conjunto de player. Nos permite obtener el player N° algo.
 ;dom: conjuntoPlayer X entero
@@ -346,6 +335,12 @@
       null
       )
   )
+
+;listPlayerXY: parámetros (players)
+;desc: Nos da una lista de listas (X Y) de cada player en el conjuntoPlayer.
+;dom: conjuntoPlayer
+;rec: Lista con todas sus coordenadas
+;tipoRec: Natural.
 (define (listPlayerXY players)
   (define (listPlayerXYX players ite)
     (cond

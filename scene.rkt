@@ -309,7 +309,11 @@
       )
   )
 
-
+;setSceneStatus: parámetros (scene status)
+;desc: Cambia el estado de una escena ("WIN","LOSE",etc)
+;dom: scene X string
+;status: String que nos dice en qué estado está la escena
+;rec: scene
 (define (setSceneStatus scene status)
    (list status (getSceneM scene)
          (getSceneN scene) (getSceneE scene)
@@ -319,7 +323,11 @@
          (getSceneEnemies scene))
   )
       
-      
+;deleteSceneEnemy: parámetros (scene N)
+;desc: Borra un enemigo del conjuntoEnemy de scene.
+;dom: scene X N
+;N: Número del conjuntoEnemy que queremos borrar.
+;rec: scene
 (define (deleteSceneEnemy scene N)
   (if (and
        (intPositive? N)
@@ -341,6 +349,11 @@
       )
   )
 
+;deleteScenePlayer: parámetros (scene N)
+;desc: Borra un player del conjunto player de una scene.
+;dom: scene X entero
+;N: Número del conjuntoPlayer que queremos borrar
+;rec: scene
 (define (deleteScenePlayer scene N)
   (if (and
        (intPositive? N)
@@ -364,11 +377,18 @@
        
                                                         
 
-
+#|              EJEMPLOS DE SCENE                       |#
 ;Scene1:
-(define S1 (createScene 100 20 3 1 123))
+(define S1 (createScene 100 20 3 1 123)) ;100 suelo 20 altura dificultad fácil
 ;Scene2:
-(define S2 (createScene 50 10 6 1 124123))
+(define S2 (createScene 50 10 6 1 124123));50 suelo 10 altura dificultad fácil
+;Scene3:
+(define S3 (createScene 30 10 3 2 5234)) ;30 suelo 10 altura dificultad difícil
+
+;Ejemplos de checkScene:
+;(checkScene S1)
+;(checkScene (createScene 1000 20 10 1 123))
+;(checkScene (createPlayer 10 10 200 4))
 
 ;Para llamar en otros archivos
 (provide (all-defined-out))

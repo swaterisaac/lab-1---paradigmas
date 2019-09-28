@@ -1,5 +1,6 @@
 #lang racket
 (require "funcionesGenerales.rkt")
+(require "enemy.rkt")
 
 ;Bullet
 
@@ -26,6 +27,7 @@
 (define (bullet? B)
   (if (and
       (list? B)
+      (not (null? B))
       (equal? "B" (car B))
       (intPositive? (get B 1))
       (intPositive? (get B 2))
@@ -147,8 +149,6 @@
   )
                         
 
-(define bullet1 (createBullet 1 1 45))
-
 ;getBulletXY: parámetros (bullet)
 ;desc: Nos entrega una lista con las coordenadas X e Y de bullet. Sirve para la función play.
 ;dom: bullet
@@ -160,7 +160,26 @@
       )
   )
       
-        
+;createBulletBy: parámetros (enemies N angle)
+;desc: Recibe un conjunto de enemy, para que en base a uno
+;de los de ese conjunto, se cree una bala (en su misma posición), con
+;un ángulo dado.
+;dom: conjuntoEnemy X entero X number
+;N: Número de enemy del que queremos que salga la bala
+;angle: ángulo con el que queremos que salga la bala.
+(define (createBulletBy enemies N angle)
+  (if (and
+       (enemies? enemies)
+       (intPositive? N)
+       (number? angle)
+       )
+      (createBullet
+       (getEnemyX (getEnemies enemies N))
+       (getEnemyY (getEnemies enemies N))
+       angle)
+      null
+      )
+  )
 
 ;Para llamar en otros archivos
 (provide (all-defined-out))
