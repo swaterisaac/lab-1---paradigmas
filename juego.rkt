@@ -524,6 +524,8 @@
 (define S4 (list "PLAYING" 10 10 1 2 1 0 B A C))
 
 #|              EJEMPLOS         (para verlos, solo sacar los comentarios multilinea asociados)           |#
+
+
 #|
 (displayScene S4)     ;displayScene usa scene->string
 ((((((play S4)0)0)paraMove)0)0)
@@ -560,6 +562,18 @@
 ;Finalmente, el player que está al borde del mapa se tira al vacío.
 (displayScene ((((((play ((((((play ((((((play ((((((play S2)2)8)paraMove)40)0))1)8)paraMove)0)0))1)0)paraMove)0)0))0)-1)paraMove)0)0))
 |#
+
+#|
+;Ejemplos de playLazy:
+
+(define lazy1 (playLazy S1 0 10 paraMove 0 40 0))
+(define lazy2 (playLazy S2 0 3 paraMove 0 40 0))
+(define lazy3 (playLazy S3 0 5 paraMove 0 80 0))
+
+;prueba:
+(displayAllLazy lazy3) ;Player 0 hace un super disparo pero no era suficiente :(
+|#
+
 
 #|
 ;Ejemplos de playDemo (Usar con escenas pequeñas, si no, son muchas promesas.
