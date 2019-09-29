@@ -73,69 +73,6 @@
       )
   )
       
-      
-
-
-#|(define (checkScene S)
-  (define (checkSceneX S ite1 ite2 repeated) ;ite1 para scene, ite2 para listas dentro de scene.
-    (if (and
-         (not (null? S))
-         (list? S)
-         (> (length S) 7)
-         (string? (get S 0))
-         (intPositive? (get S 1))
-         (intPositive? (get S 2))
-         (intPositive? (get S 3))
-         (intPositive? (get S 4))
-         (intPositive? (get S 5))
-         (intPositive? (get S 6))
-         )
-        (cond
-        [(= ite1 -1) (checkSceneX S (- (length S) 1) (- (length (get S (- (length S) 1))) 1) repeated)]
-        [(= ite1 7) (if (<= ite2 0) ;revisamos floor
-                        (floor? (get (get S 7) 0))
-                        (and (checkSceneX S ite1 (- ite2 1) repeated) (floor? (get (get S ite1) ite2)))
-                        )]
-        [(= ite1 8) (if (<= ite2 0) ;revisamos player
-                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
-                                          (myAppend repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))))
-                             (and (player? (get (get S ite1) 0))
-                                  (find (get S 7) (list (getPlayerX (get (get S ite1) 0)) (- (getPlayerY (get (get S ite1) 0)) 1)));Player está en suelo
-                                  (not (find repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))));Player no tiene posicion repetida
-                                  ))
-                        (and (checkSceneX S ite1 (- ite2 1)
-                                          (myAppend repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))));Agrego posicion
-                             (and
-                             (player? (get (get S ite1) ite2))
-                             (find (get S 7) (list (getPlayerX (get (get S ite1) ite2)) (- (getPlayerY (get (get S ite1) ite2)) 1)))
-                             (not (find repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))))
-                             )
-                             )
-                        )]
-        [(= ite1 9) (if (<= ite2 0) ;revisamos enemy
-                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
-                                          (myAppend repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
-                             (and
-                             (enemy? (get (get S ite1) 0))
-                             (find (get S 7) (list (getEnemyX (get (get S ite1) 0)) (- (getEnemyY (get (get S ite1) 0)) 1)))
-                             (not (find repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
-                             )
-                             )
-                        (and (checkSceneX S ite1 (- ite2 1)
-                                          (myAppend repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
-                             (and
-                              (enemy? (get (get S ite1) ite2))
-                              (find (get S 7) (list (getEnemyX (get (get S ite1) ite2)) (- (getEnemyY (get (get S ite1) ite2)) 1)))
-                              (not (find repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
-                              )
-                             )
-                        )]
-        [else #f])
-        #f
-        )
-    )
-  (checkSceneX S -1 0 null)
-  )|#
 ;Selectoras de Scene:
 ;getSceneStatus: parámetros (scene)
 ;desc: Nos entrega el estado de una escena. ("PLAYING","WIN","LOSE" o "DRAW")
@@ -392,6 +329,69 @@
 
 ;Para llamar en otros archivos
 (provide (all-defined-out))
+
+
+
+#| MI ANTIGUO CHECKSCENE: (define (checkScene S)
+  (define (checkSceneX S ite1 ite2 repeated) ;ite1 para scene, ite2 para listas dentro de scene.
+    (if (and
+         (not (null? S))
+         (list? S)
+         (> (length S) 7)
+         (string? (get S 0))
+         (intPositive? (get S 1))
+         (intPositive? (get S 2))
+         (intPositive? (get S 3))
+         (intPositive? (get S 4))
+         (intPositive? (get S 5))
+         (intPositive? (get S 6))
+         )
+        (cond
+        [(= ite1 -1) (checkSceneX S (- (length S) 1) (- (length (get S (- (length S) 1))) 1) repeated)]
+        [(= ite1 7) (if (<= ite2 0) ;revisamos floor
+                        (floor? (get (get S 7) 0))
+                        (and (checkSceneX S ite1 (- ite2 1) repeated) (floor? (get (get S ite1) ite2)))
+                        )]
+        [(= ite1 8) (if (<= ite2 0) ;revisamos player
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
+                                          (myAppend repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))))
+                             (and (player? (get (get S ite1) 0))
+                                  (find (get S 7) (list (getPlayerX (get (get S ite1) 0)) (- (getPlayerY (get (get S ite1) 0)) 1)));Player está en suelo
+                                  (not (find repeated (list (getPlayerX (get (get S ite1) 0)) (getPlayerY (get (get S ite1) 0)))));Player no tiene posicion repetida
+                                  ))
+                        (and (checkSceneX S ite1 (- ite2 1)
+                                          (myAppend repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))));Agrego posicion
+                             (and
+                             (player? (get (get S ite1) ite2))
+                             (find (get S 7) (list (getPlayerX (get (get S ite1) ite2)) (- (getPlayerY (get (get S ite1) ite2)) 1)))
+                             (not (find repeated (list (getPlayerX (get (get S ite1) ite2)) (getPlayerY (get (get S ite1) ite2)))))
+                             )
+                             )
+                        )]
+        [(= ite1 9) (if (<= ite2 0) ;revisamos enemy
+                        (and (checkSceneX S (- ite1 1) (- (length (get S (- ite1 1))) 1)
+                                          (myAppend repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
+                             (and
+                             (enemy? (get (get S ite1) 0))
+                             (find (get S 7) (list (getEnemyX (get (get S ite1) 0)) (- (getEnemyY (get (get S ite1) 0)) 1)))
+                             (not (find repeated (list (getEnemyX (get (get S ite1) 0)) (getEnemyY (get (get S ite1) 0)))))
+                             )
+                             )
+                        (and (checkSceneX S ite1 (- ite2 1)
+                                          (myAppend repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
+                             (and
+                              (enemy? (get (get S ite1) ite2))
+                              (find (get S 7) (list (getEnemyX (get (get S ite1) ite2)) (- (getEnemyY (get (get S ite1) ite2)) 1)))
+                              (not (find repeated (list (getEnemyX (get (get S ite1) ite2)) (getEnemyY (get (get S ite1) ite2)))))
+                              )
+                             )
+                        )]
+        [else #f])
+        #f
+        )
+    )
+  (checkSceneX S -1 0 null)
+  )|#
 
                     
                              

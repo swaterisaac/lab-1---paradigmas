@@ -348,7 +348,12 @@
       [else (cons (getPlayerXY (getPlayers players ite)) (listPlayerXYX players (+ ite 1)))]
       )
     )
-  (listPlayerXYX players 0)
+  (if (and
+       (not (null? players))
+       (players? players))
+      (listPlayerXYX players 0)
+      null
+      )
   )
 
 ;Para llamar en otros archivos

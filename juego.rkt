@@ -67,23 +67,33 @@
                                       (if (not (checkScene newS))
                                           (if (null? (getScenePlayers(deleteScenePlayer newS member)))
                                               ;Player muere si se queda en una casilla de otro player, enemy o fuera de floor.
+
+                                              ;Retorno 1: Todos los players mueren.
                                               (setSceneStatus (deleteScenePlayer newS member) "LOSE")
+
+                                              ;Retorno 2: Muere un player pero se sigue jugando.
                                               (playX (deleteScenePlayer newS member)
                                                      0 0 tf 2 (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180))
                                                      )
                                               )
+                                          ;Retorno 3: Player se pudo mover y dispara.
                                           (playX newS 0 0 tf 1 (tf bullet))
                                           )
                                       )]
                                    )]
                                 ;Step 1: Disparar jugador
                                 [(= step 1)
-                                 (cond 
+                                 (cond
+      
                                    ;Bala en enemigo
                                    [(find (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))
-                                               (if (= (length (getSceneEnemies scene)) 1) ;Muerieron todos los enemigos?
+                                               (if (= (length (getSceneEnemies scene)) 1);Murieron todos los enemigos?
+
+                                                   ;Retorno 4: Murieron todos los enemigos.
                                                    (deleteSceneEnemy (setSceneStatus scene "WIN") 0)
-                                                   ;Buscamos en qué enemigo fue, y borramos ese enemigo.;(findXY (listEnemiesXY (getSceneEnemies scene)) (getBulletXY bullet))]
+                                                   
+                                                   ;Buscamos en qué enemigo fue, y borramos ese enemigo.
+                                                   ;Retorno 5: Murió solo un enemigo.
                                                    (playX
                                                     (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet)))
                                                     0 0 tf 2 (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180)))
@@ -91,11 +101,16 @@
                                               ;Bala en aliado
                                               [(find (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet))
                                                (if (and (= (length (getScenePlayers scene)) 1) (= (getPlayerLife (getPlayers (getScenePlayers scene) 0)) 1))
+
+                                                   ;Retorno 6: Muere un aliado por bala aliada, no queda ningún aliado.
                                                    (deleteScenePlayer (setSceneStatus scene "LOSE") 0)
                                                    (if (= (getPlayerLife (get (getScenePlayers scene) (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)))) 1)
+                                                       ;Retorno 7: Muere un aliado por disparo aliado.
                                                         (playX
                                                         (deleteScenePlayer scene (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)))
                                                         0 0 tf 2 (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180)))
+
+                                                        ;Retorno 8: Se le baja 1 de vida a un aliado por disparo aliado.
                                                        (playX (setScenePlayer scene (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)) 1 4)
                                                                0 0 tf 2  (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180))
                                                         )
@@ -103,14 +118,17 @@
                                                    )]
                                
                                               ;Bala en Earth o fuera de rango
-                                              [(or (find (getSceneEarth scene) (getBulletXY bullet)) (and (< (getBulletX bullet) 0) (> (getBulletX bullet) (getSceneM scene)))
+                                              [(or (find (getSceneEarth scene) (getBulletXY bullet)) (< (getBulletX bullet) 0) (> (getBulletX bullet) (getSceneM scene))
                                                    (> (getBulletY bullet) (getSceneN scene)))
+
+                                               ;Retorno 9: Bala aliada en tierra o fuera de rango.
                                                (playX
                                                 scene 0 0 tf 2 (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180))
                                                 )]
                                                
                                               ;Bala en recorrido
-                                              [else 
+                                              [else
+                                               ;Retorno 10: Bala en recorrido.
                                                (playX scene 0 0 tf 1 (tf bullet))]
                                                
                                               )]
@@ -121,22 +139,32 @@
                                               [(find (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))
                                                 ;Verificamos status
                                                (if (= (length (getSceneEnemies scene)) 1)
+                                                   
+                                                   ;Retorno 11: Enemigo muerto por una bala enemiga, todos los enemigos muertos.
                                                    (deleteSceneEnemy (setSceneStatus scene "WIN") 0)
+                                                   
+                                                   ;Retorno 12: Enemigo muerto por una bala enemiga.
                                                    (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))))]
                                               ;Bala en aliado
                                               [(find (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet))
                                                ;Verificamos status
                                                (if (and (= (length (getScenePlayers scene)) 1) (= (getPlayerLife (getPlayers (getScenePlayers scene) 0)) 1))
+                                                   
+                                                   ;Retorno 13: Todos los aliados muertos, el último por bala enemiga.
                                                    (deleteScenePlayer (setSceneStatus scene "LOSE") 0)
                                                    (if (= (getPlayerLife (getPlayers (getScenePlayers scene) 0)) 1)
-                                                       (deleteScenePlayer scene (findXY (listPlayerXY (getSceneEnemies scene)) (getBulletXY bullet)))
+                                                       ;Retorno 14: Aliado muerto por bala enemiga.
+                                                       (deleteScenePlayer scene (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)))
+                                                       ;Retorno 15: Aliado herido por bala enemiga.
                                                               (setScenePlayer scene (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)) 1 4)
                                                               ))]
                                               ;Bala en Earth o fuera de rango
                                               [(or (find (getSceneEarth scene) (getBulletXY bullet)) (<= (getBulletX bullet) 0) (> (getBulletX bullet) (getSceneM scene))
                                                    (> (getBulletY bullet) (getSceneN scene)))
+                                               ;Retorno 16: Bala enemiga fuera de rango o en el suelo
                                                scene]
                                               ;Bala en recorrido
+                                              ;Retorno 17: Bala en recorrido.
                                               [else (playX scene 0 0 tf 2 (tf bullet))]
                                               )]
                                 
@@ -191,19 +219,21 @@
            (cond
              [(and (null? (getScenePlayers scene))
                    (null? (getSceneEnemies scene)))
-              (setSceneStatus scene "DRAW")]
+              (cons (lazy (setSceneStatus scene "DRAW")) null)
+              ]
              [(null? (getScenePlayers scene))
-              (setSceneStatus scene "DEFEAT")
+              (cons (lazy (setSceneStatus scene "DEFEAT")) null)
               ]
              [(null? (getSceneEnemies scene))
-              (setSceneStatus scene "WIN")
+              (cons (lazy (setSceneStatus scene "WIN")) null)
               ]
              [else
                                     
               (let  ([newS (setScenePlayer scene member (+ (getPlayerX (getPlayers (getScenePlayers scene) member)) move) 1)])
                 (if (not (checkScene newS))
                     (if (null? (getScenePlayers(deleteScenePlayer newS member)))
-                        (setSceneStatus (deleteScenePlayer newS member) "LOSE")
+                        ;Retorno 0: Todos los player muertos.
+                        (cons (lazy (setSceneStatus (deleteScenePlayer newS member) "LOSE")) null)
 
 
                         ;Retorno 1: Player muere si se queda en una casilla de otro player, enemy o fuera de floor.
@@ -226,7 +256,7 @@
            (cond 
              ;Bala en enemigo
              [(find (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))
-              (display (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180)))
+      
               (if (= (length (getSceneEnemies scene)) 1) ;Muerieron todos los enemigos?
 
                   ;Retorno 3: Murieron todos los enemigos
@@ -273,7 +303,7 @@
                   )]
                                
              ;Bala en Earth o fuera de rango
-             [(or (find (getSceneEarth scene) (getBulletXY bullet)) (and (< (getBulletX bullet) 0) (> (getBulletX bullet) (getSceneM scene)))
+             [(or (find (getSceneEarth scene) (getBulletXY bullet)) (< (getBulletX bullet) 0) (> (getBulletX bullet) (getSceneM scene))
                   (> (getBulletY bullet) (getSceneN scene)))
 
 
@@ -319,7 +349,7 @@
                              (if (= (getPlayerLife (getPlayers (getScenePlayers scene) 0)) 1)
 
                                  ;Retorno 13:
-                                 (cons (lazy (deleteScenePlayer scene (findXY (listPlayerXY (getSceneEnemies scene)) (getBulletXY bullet)))) null)
+                                 (cons (lazy (deleteScenePlayer scene (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)))) null)
 
                                  ;Retorno 14:
                                  (cons (lazy (setScenePlayer scene (findXY (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet)) 1 4)) null)
@@ -405,7 +435,7 @@
        (string-append (getSceneStatus scene) "  ENE:"
                       (number->string (getSceneE scene))
                       "   PL:" (number->string (getSceneP scene))
-                      "\n\n\n" (convX scene (getSceneN scene)))
+                      "\n" (convX scene (getSceneN scene)))
        ]
       [(= ite 1) (sceneFile scene 1)]
       [else (string-append (sceneFile scene ite) "\n" (convX scene (- ite 1)) )]
@@ -462,22 +492,85 @@
   )
         
       
-#|(define (playTillLose scene)
-  (display (scene->string scene))
+(define (playDemo scene seed)
+  ;(displayScene scene)
   (if (or
+       (null? scene)
        (equal? (getSceneStatus scene) "WIN")
        (equal? (getSceneStatus scene) "LOSE")
        (equal? (getSceneStatus scene) "DRAW")
        )
       null
-      (playTillLose ((((((play scene)0)0)paraMove)0)0))
-       )
-  )|#
-
+      (append (playLazy scene (modulo seed (getSceneP scene))
+                        (modulo seed 5) paraMove 0 (modulo seed 90) 0)
+              (playDemo ((((((play scene)
+                             (modulo seed (getSceneP scene))
+                                         )
+                            (modulo seed 5)
+                                          )
+                           paraMove)
+                          (modulo seed 90)
+                          )
+                         0) (myRandom seed)
+                                                                         )
+              )
+      )
+  )
+;((((((play scene)0)0)paraMove)0)0))
 ;Definiciones de prueba                       
 (define A (deletePlayer (generatePlayer 1)0))
 (define B (createEarth 10 10 0))
 (define C (setEnemiesX (generateEnemy B 1 0) 0 1))
-(define D (list "PLAYING" 10 10 1 2 1 0 B A C))
-;((((((play D )0 ) 0 )paraMove )0 )0)
-         
+(define S4 (list "PLAYING" 10 10 1 2 1 0 B A C))
+
+#|              EJEMPLOS         (para verlos, solo sacar los comentarios multilinea asociados)           |#
+#|
+(displayScene S4)     ;displayScene usa scene->string
+((((((play S4)0)0)paraMove)0)0)
+(define S5 ((((((play S4)0)0)paraMove)180)0));S5 = S4 pero con el primer jugador disparando al enemigo ubicado atrás.
+(displayScene S5)
+|#
+
+;Representación normal
+#|S2
+((((((play S2)2)8)paraMove)40)0)
+((((((play ((((((play S2)2)8)paraMove)40)0))1)8)paraMove)0)0)
+|#
+
+;Representación con strings
+#|
+(scene->string S2)
+(scene->string ((((((play S2)2)8)paraMove)90)0))
+(scene->string ((((((play ((((((play S2)2)8)paraMove)40)0))1)8)paraMove)0)0))
+|#
+
+
+#|
+;Narrando una triste historia... 
+
+
+;Mostrandolo en pantalla:
+(displayScene S2)
+;En este movimiento se mata a un enemigo
+(displayScene  ((((((play S2)2)8)paraMove)40)0))
+;En este movimiento se le quita una vida a un player.
+(displayScene ((((((play ((((((play S2)2)8)paraMove)40)0))1)8)paraMove)0)0))
+;En este movimiento el player que le había quitado una vida, lo acaba matando
+(displayScene ((((((play ((((((play ((((((play S2)2)8)paraMove)40)0))1)8)paraMove)0)0))1)0)paraMove)0)0))
+;Finalmente, el player que está al borde del mapa se tira al vacío.
+(displayScene ((((((play ((((((play ((((((play ((((((play S2)2)8)paraMove)40)0))1)8)paraMove)0)0))1)0)paraMove)0)0))0)-1)paraMove)0)0))
+|#
+
+#|
+;Ejemplos de playDemo (Usar con escenas pequeñas, si no, son muchas promesas.
+(define promiseDemo1 (playDemo S3 10))
+(define promiseDemo2 (playDemo S4 0)) ;Aquí los players se mueren cayendo al precipicio, hacia la derecha.
+(define promiseDemo3 (playDemo S3 4123))
+
+;OBS: Es difícil encontrar una partida demo donde los players ganen, ya que
+;A diferencia de los enemigos, los players en la demo disparan con ángulo aleatorio, los enemigos
+;siempre en 180.
+;Probar:
+(displayAllLazy promiseDemo1)
+|#
+

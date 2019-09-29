@@ -353,7 +353,10 @@
       [else (cons (getEnemyXY (getEnemies enemies ite)) (listEnemyXYX enemies (+ ite 1)))]
       )
     )
-  (if (not (null? enemies))
+  (if (and
+       (not (null? enemies))
+       (enemies? enemies)
+       )
       (listEnemyXYX enemies 0)
       null
       )
