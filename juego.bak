@@ -1,7 +1,0 @@
-#lang racket
-(require "funcionesGenerales.rkt")
-(require "floorAndEarth.rkt")
-(require "player.rkt")
-(require "enemy.rkt")
-(require "bullet.rkt")
-(require "scene.rkt")
