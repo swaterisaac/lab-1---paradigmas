@@ -96,7 +96,9 @@
                                                    ;Retorno 5: Murió solo un enemigo.
                                                    (playX
                                                     (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet)))
-                                                    0 0 tf 2 (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180)))
+                                                    0 0 tf 2 (tf (createBulletBy (getSceneEnemies (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))))
+                                                (- (getSceneE (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))))
+                                                   1) 180)))
                                                    )]
                                               ;Bala en aliado
                                               [(find (listPlayerXY (getScenePlayers scene)) (getBulletXY bullet))
@@ -267,11 +269,15 @@
                   ;Retorno 4:
                   (cons
                    (lazy (myAppend (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet)))
-                                   (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180))))
+                                   (tf (createBulletBy (getSceneEnemies (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))))
+                                                (- (getSceneE (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))))
+                                                   1) 180))))
                                    
                    (playLazyX
                    (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet)))
-                   0 0 tf 2 (tf (createBulletBy (getSceneEnemies scene) (- (getSceneE scene) 1) 180)))
+                   0 0 tf 2 (tf (createBulletBy (getSceneEnemies (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))))
+                                                (- (getSceneE (deleteSceneEnemy scene (findXY (listEnemyXY (getSceneEnemies scene)) (getBulletXY bullet))))
+                                                   1) 180)))
                    )
                   )]
              ;Bala en aliado
@@ -395,24 +401,24 @@
        (cond
          [(find (getSceneEarth scene) (list ite file))
           "$"]
+         [(equal? (getBulletXY (get scene 10)) (list ite file))
+          "="]
          [(find (listEnemyXY(getSceneEnemies scene)) (list ite file))
           "E"]
          [(find (listPlayerXY (getScenePlayers scene)) (list ite file))
           "P"]
-         [(equal? (getBulletXY (get scene 10)) (list ite file))
-          "="]
          [else "-"]
           )]
       [else
        (cond
          [(find (getSceneEarth scene) (list ite file))
           (string-append "$" (sceneFileX scene file (+ ite 1)))]
+         [(equal? (getBulletXY (get scene 10)) (list ite file))
+          (string-append "=" (sceneFileX scene file (+ ite 1)))]
          [(find (listEnemyXY(getSceneEnemies scene)) (list ite file))
           (string-append "E" (sceneFileX scene file (+ ite 1)))]
          [(find (listPlayerXY (getScenePlayers scene)) (list ite file))
           (string-append "P" (sceneFileX scene file (+ ite 1)))]
-         [(equal? (getBulletXY (get scene 10)) (list ite file))
-          (string-append "=" (sceneFileX scene file (+ ite 1)))]
          [else
           (string-append "-" (sceneFileX scene file (+ ite 1)))
           ]
@@ -516,12 +522,12 @@
               )
       )
   )
-;((((((play scene)0)0)paraMove)0)0))
+
 ;Definiciones de prueba                       
 (define A (deletePlayer (generatePlayer 1)0))
 (define B (createEarth 10 10 0))
 (define C (setEnemiesX (generateEnemy B 1 0) 0 1))
-(define S4 (list "PLAYING" 10 10 1 2 1 0 B A C))
+(define S4 (list "PLAYING" 10 10 1 2 1 0 B A C)) ;Enemigo en primera posición, creado artificialmente
 
 #|              EJEMPLOS         (para verlos, solo sacar los comentarios multilinea asociados)           |#
 

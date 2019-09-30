@@ -32,10 +32,11 @@
 ;createEarth: (conjunto de floor)
 ;parámetros: (M seed)
 ;desc: Función de construcción de un conjunto de floor.
-;dom: entero X entero (positivos)
+;dom: entero X entero (positivos) X entero
 ;M: Cantidad de floor
+;N: Altura
 ;seed: semilla
-;rec: conjunto de floor ("F" M (X1 Y1) (X2 Y2) ...)
+;rec: conjunto de floor ((X1 Y1) (X2 Y2) ...)
 ;Encapsulación: 
 ;land: Si genera una isla flotante o no. 0 para no, 1 para si.
 (define (createEarth M N seed)

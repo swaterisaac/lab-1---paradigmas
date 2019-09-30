@@ -14,7 +14,7 @@
 ;D indica la la dificultad.
 ;seed indica la semilla de la escena.
 ;Rec: scene.
-;tipo de recursión: Natural.
+;tipo de recursión: Natural. (Recursión usada en generateEnemy y createEarth)
 
 ;Representación: (<estado> <cantSuelo> <cantAltura> <cantEnemigosVivos> <cantPlayersVivos> <dificultad> <semilla> <earth> <conjuntoEnemy> <conjuntoPlayer>)
 (define (createScene M N E D seed)
