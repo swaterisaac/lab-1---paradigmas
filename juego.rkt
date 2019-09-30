@@ -453,6 +453,21 @@
       )
   )
 
+;scene->xml: parámetros (scene)
+;desc: Transforma una escena a xml. Nos da la información de cuántos players hay vivos,
+;cuánto terreno hay, y cómo se representaría un player y un enemy.
+;dom:scene
+;rec:string
+(define (scene->xml scene)
+  (string-append "<scene>\n
+<status>" (getSceneStatus scene) "</status>\n
+<ENE>" (number->string (getSceneE scene)) "</ENE>\n
+<PL>" (number->string (getSceneP scene)) "</PL>\n
+<floor>" (number->string (length (getSceneEarth scene))) "</floor>\n
+<players>" "P" "</players>\n
+<enemies>" "E" "</enemies>\n
+</scene>")
+  )
 
 ;displayScene: parámetros (scene)
 ;desc: Función que recibe una scene y la muestra por pantalla.
